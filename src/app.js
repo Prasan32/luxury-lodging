@@ -1,7 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import globalErrorHandler from './middlewares/globalErrorHandler';
+import globalErrorHandler from './middlewares/globalErrorHandler.js';
 const app = express();
 
 app.use(cors());

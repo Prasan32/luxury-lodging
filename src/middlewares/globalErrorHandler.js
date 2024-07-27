@@ -1,7 +1,8 @@
 
-import { ValidationError } from 'joi';
-import { config } from '../config/envConfig';
+import Joi from 'joi';
+import { config } from '../config/envConfig.js';
 import { HttpError } from 'http-errors';
+const { ValidationError } = Joi;
 
 const globalErrorHandler = (err, req, res, next) => {
     let statusCode = 500;
