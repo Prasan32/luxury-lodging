@@ -1,5 +1,5 @@
 import app from "./src/app.js";
-import { config } from "./src/config/config.js";
+import { config } from "./src/config/envConfig.js";
 
 app.listen(config.PORT, (error, server) => {
     if (error) throw error;
