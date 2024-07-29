@@ -25,12 +25,9 @@ const syncHostAwayListing = async () => {
     logger.info(`Syncing ${newListings.length} new listings from Hostaway API`);
     const newListingObjects = newListings.map((obj) => createListingObject(obj));
 
-    try {
-        await Listing.bulkCreate(newListingObjects);
-        logger.info("Listings synced successfully");
-    } catch (error) {
-        logger.error("Error syncing listings with the database", error);
-    }
+    await Listing.bulkCreate(newListingObjects);
+    logger.info("Listings synced successfully");
+    return;
 };
 
 const createListingObject = (data) => {
@@ -63,8 +60,14 @@ const createListingObject = (data) => {
     };
 };
 
+const getListings = async () => {
+    const listings = await Listing.findAll();
+    return listings;
+}
+
 const listingService = {
-    syncHostAwayListing
+    syncHostAwayListing,
+    getListings
 };
 
 export default listingService;

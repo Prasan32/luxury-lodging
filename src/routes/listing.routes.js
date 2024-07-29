@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { syncHostAwayListing } from "../controllers/listing.controller.js";
+import { getListings, syncHostAwayListing } from "../controllers/listing.controller.js";
 const router = Router();
 
 router.route('/synclisting').get(syncHostAwayListing);
+
+router.route('/').get(getListings);
 
 export default router;
