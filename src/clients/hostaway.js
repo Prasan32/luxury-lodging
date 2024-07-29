@@ -29,11 +29,11 @@ const getAccessToken = async () => {
 };
 
 
-export const getListings = async () => {
+const getListings = async () => {
     const url = `${HOSTAWAY_API_URL}/listings`;
 
     try {
-        const accessToken = getAccessToken();
+        const accessToken = await getAccessToken();
         if (!accessToken) return null;
 
         const response = await axios.get(url, {
@@ -51,7 +51,7 @@ export const getListings = async () => {
 };
 
 
-export const getListingInfo = async (id) => {
+const getListingInfo = async (id) => {
     const url = `${HOSTAWAY_API_URL}/listings/${id}`;
     try {
         const accessToken = getAccessToken();
@@ -70,3 +70,10 @@ export const getListingInfo = async (id) => {
         return null;
     }
 };
+
+const HostAwayClient = {
+    getListings,
+    getListingInfo
+};
+
+export default HostAwayClient;

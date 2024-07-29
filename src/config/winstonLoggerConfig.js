@@ -1,8 +1,8 @@
 
 import { createLogger, format, transports } from "winston";
 const { combine, timestamp, printf } = format;
-import { getCurrentDateTime } from "../helpers/date";
-import { config } from "../config/envConfig";
+import { getCurrentDateTime } from "../helpers/date.js";
+import { config } from "../config/envConfig.js";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 const myFormat = printf(({ level, message, timestamp }) => {

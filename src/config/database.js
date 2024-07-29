@@ -1,6 +1,6 @@
 // config/database.js
 import { Sequelize } from 'sequelize';
-import config from './config.json';
+import config from './config.json' assert { type: 'json' };;
 
 const environment = process.env.NODE_ENV || 'development';
 const { username, password, database, host, dialect } = config[environment];
