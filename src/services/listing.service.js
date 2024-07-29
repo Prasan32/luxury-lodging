@@ -67,9 +67,6 @@ const getListings = async () => {
 
 const getListingInfo = async (listingId) => {
     const listing = await Listing.findByPk(listingId);
-    if (!listing) {
-        throw new createHttpError(404, `Listing with id ${listingId} not found`);
-    }
     return listing;
 }
 
