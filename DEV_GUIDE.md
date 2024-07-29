@@ -1,4 +1,6 @@
 ## Sequelize commands
+---------------------------------------------------------------------------------------------------------
+## IMPORTANT NOTE: While running the command related to migration and seeders, change the directory to src/
 
 ## Migration
 1. Command to generate migration file : **npx sequelize-cli migration:generate --name <migration_name>**
@@ -9,3 +11,5 @@
 3. Command to generate seed file : **npx sequelize-cli seed:generate --name <seeder_name>**
 4. Command to insert the initial datas from seeders: **npx sequelize db:seed:all**
    This will insert any default values from all the seed files
+
+---------------------------------------------------------------------------------------------------------
