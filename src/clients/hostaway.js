@@ -30,19 +30,43 @@ const getAccessToken = async () => {
 
 
 export const getListings = async () => {
-    const accessToken = getAccessToken();
-    if (!accessToken) {
+    const url = `${HOSTAWAY_API_URL}/listings`;
+
+    try {
+        const accessToken = getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        console.error(`Error fetching listings`, error);
         return null;
     }
+};
 
-    const url = `${HOSTAWAY_API_URL}/listings`;
-    const headers = {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Cache-Control": "no-cache",
-        },
-    };
 
-    const response = await axios.get(url, headers);
-    return response.data?.result;
+export const getListingInfo = async (id) => {
+    const url = `${HOSTAWAY_API_URL}/listings/${id}`;
+    try {
+        const accessToken = getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        console.error(`Error fetching listing info for id ${id}`, error);
+        return null;
+    }
 };

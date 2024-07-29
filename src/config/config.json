@@ -2,7 +2,7 @@
   "development": {
     "username": "development",
     "password": "Admin@admin123",
-    "database": "luxury-lodging",
+    "database": "luxury_lodging",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
