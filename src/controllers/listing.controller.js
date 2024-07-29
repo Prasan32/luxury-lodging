@@ -10,3 +10,9 @@ export const getListings = asyncHandler(async (req, res, next) => {
     const listings = await listingService.getListings();
     res.status(200).json(listings);
 });
+
+export const getListingInfo = asyncHandler(async (req, res, next) => {
+    const listingId = req.params.listingId;
+    const listing = await listingService.getListingInfo(listingId);
+    res.status(200).json(listing);
+});

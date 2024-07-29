@@ -65,9 +65,18 @@ const getListings = async () => {
     return listings;
 }
 
+const getListingInfo = async (listingId) => {
+    const listing = await Listing.findByPk(listingId);
+    if (!listing) {
+        throw new createHttpError(404, `Listing with id ${listingId} not found`);
+    }
+    return listing;
+}
+
 const listingService = {
     syncHostAwayListing,
-    getListings
+    getListings,
+    getListingInfo
 };
 
 export default listingService;
