@@ -166,9 +166,7 @@ const searchListings = async (location, checkIn, checkOut, guests) => {
 
     const listings = await Listing.findAll(
         {
-            where: listingSearchCondition
-        },
-        {
+            where: listingSearchCondition,
             include: [
                 {
                     model: ListingImage,
@@ -179,7 +177,7 @@ const searchListings = async (location, checkIn, checkOut, guests) => {
                     as: 'amenities'
                 }
             ]
-        }
+        },
     );
 
     if (checkIn != "" && checkOut != "") {
