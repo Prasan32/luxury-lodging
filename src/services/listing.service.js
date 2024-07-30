@@ -1,7 +1,8 @@
 import createHttpError from "http-errors";
 import HostAwayClient from "../clients/hostaway.js";
-import Listing from "../models/Listing.js";
+import { Listing, ListingImage } from "../models/index.js";
 import logger from "../config/winstonLoggerConfig.js";
+import sequelize from "../config/database.js";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -23,10 +24,28 @@ const syncHostAwayListing = async () => {
     }
 
     logger.info(`Syncing ${newListings.length} new listings from Hostaway API`);
-    const newListingObjects = newListings.map((obj) => createListingObject(obj));
 
-    await Listing.bulkCreate(newListingObjects);
-    logger.info("Listings synced successfully");
+    for (const newListingData of newListings) {
+       
+        await sequelize.transaction(async (t) => {
+            const newListingObject = createListingObject(newListingData);
+
+            const newListing = await Listing.create(newListingObject, { transaction: t });
+
+            // Process and save listing images
+            if (newListingData.listingImages && newListingData.listingImages.length > 0) {
+                const imageObjects = newListingData.listingImages.map(image => createListingImageObject(image, newListing.id));
+                await ListingImage.bulkCreate(imageObjects, { transaction: t });
+            }
+
+            logger.info(`Listing ${newListing.id} and its images synced successfully`);
+        }).catch((error) => {
+            logger.error(`Error syncing listing ${newListingData.id}: ${error.message}`);
+            throw error;
+        });
+    }
+
+    logger.info("Listings and their images synced successfully");
     return;
 };
 
@@ -60,13 +79,36 @@ const createListingObject = (data) => {
     };
 };
 
+const createListingImageObject = (image, listingId) => {
+    return {
+        id: image.id,
+        listingId,
+        caption: image.caption,
+        vrboCaption: image.vrboCaption,
+        airbnbCaption: image.airbnbCaption,
+        url: image.url,
+        sortOrder: image.sortOrder,
+    };
+};
+
+
 const getListings = async () => {
-    const listings = await Listing.findAll();
+    const listings = await Listing.findAll({
+        include: [{
+            model: ListingImage,
+            as: 'images'
+        }]
+    });
     return listings;
 }
 
 const getListingInfo = async (listingId) => {
-    const listing = await Listing.findByPk(listingId);
+    const listing = await Listing.findByPk(listingId,{
+        include: [{
+            model: ListingImage,
+            as: 'images'
+        }]
+    });
     return listing;
 }
 
