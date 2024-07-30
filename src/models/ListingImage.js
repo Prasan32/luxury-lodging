@@ -1,11 +1,14 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import Listing from "./Listing.js";
 
 const ListingImage = sequelize.define("Listing", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        allowNull: false,
+    },
+    listingId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     caption: {
@@ -20,7 +23,7 @@ const ListingImage = sequelize.define("Listing", {
         type: DataTypes.STRING,
         allowNull: true
     },
-    ulr: {
+    url: {
         type: DataTypes.STRING
     },
    sortOrder:{
@@ -32,7 +35,5 @@ const ListingImage = sequelize.define("Listing", {
     timestamps: true
 });
 
-// Association
-ListingImage.belongsTo(Listing, { foreignKey: 'id', as: 'listing' });
 
 export default ListingImage;

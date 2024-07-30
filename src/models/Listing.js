@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import ListingImage from "./ListingImage.js";
 
 const Listing = sequelize.define("Listing", {
     id: {
@@ -83,8 +82,6 @@ const Listing = sequelize.define("Listing", {
     timestamps: true
 });
 
-// Association
-Listing.hasMany(ListingImage, { foreignKey: 'id', as: 'images' });
-ListingImage.belongsTo(Listing, { foreignKey: 'id', as: 'listing' });
+
 
 export default Listing;
