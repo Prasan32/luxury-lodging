@@ -1,6 +1,6 @@
 import createHttpError from "http-errors";
 import HostAwayClient from "../clients/hostaway.js";
-import { Listing, ListingImage } from "../models/index.js";
+import { Listing, ListingImage, ListingAmenity } from "../models/index.js";
 import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
 
@@ -38,14 +38,20 @@ const syncHostAwayListing = async () => {
                 await ListingImage.bulkCreate(imageObjects, { transaction: t });
             }
 
-            logger.info(`Listing ${newListing.id} and its images synced successfully`);
+            //Process and save listing amenities
+            if (newListingData.listingAmenities && newListingData.listingAmenities.length > 0) {
+                const amenityObjects = newListingData.listingAmenities.map(amenity => createListingAmenityObject(amenity, newListing.id));
+                await ListingAmenity.bulkCreate(amenityObjects, { transaction: t });
+            }
+
+            logger.info(`Listing ${newListing.id} and its images, amenities synced successfully`);
         }).catch((error) => {
             logger.error(`Error syncing listing ${newListingData.id}: ${error.message}`);
             throw error;
         });
     }
 
-    logger.info("Listings and their images synced successfully");
+    logger.info("Listings and their images, amenities synced successfully");
     return;
 };
 
@@ -91,23 +97,44 @@ const createListingImageObject = (image, listingId) => {
     };
 };
 
+const createListingAmenityObject = (amenity, listingId) => {
+    return {
+        id: amenity.id,
+        listingId: listingId,
+        amenityId: amenity.amenityId,
+        amenityName: amenity.amenityName,
+    };
+};
+
 
 const getListings = async () => {
     const listings = await Listing.findAll({
-        include: [{
-            model: ListingImage,
-            as: 'images'
-        }]
+        include: [
+            {
+                model: ListingImage,
+                as: 'images'
+            },
+            {
+                model: ListingAmenity,
+                as: 'amenities'
+            }
+        ]
     });
     return listings;
 }
 
 const getListingInfo = async (listingId) => {
     const listing = await Listing.findByPk(listingId,{
-        include: [{
-            model: ListingImage,
-            as: 'images'
-        }]
+        include: [
+            {
+                model: ListingImage,
+                as: 'images'
+            },
+            {
+                model: ListingAmenity,
+                as: 'amenities'
+            }
+        ]
     });
     return listing;
 }
