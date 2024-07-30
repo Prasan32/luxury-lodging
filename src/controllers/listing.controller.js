@@ -21,3 +21,9 @@ export const getListingInfo = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json(listing);
 });
+
+export const searchListings = asyncHandler(async (req, res, next) => {
+    const { location, checkIn, checkOut, guests } = req.query;
+    const listings = await listingService.searchListings(location, checkIn, checkOut, guests);
+    return res.status(200).json(listings);
+});

@@ -3,6 +3,7 @@ import HostAwayClient from "../clients/hostaway.js";
 import { Listing, ListingImage, ListingAmenity } from "../models/index.js";
 import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
+import { Op } from "sequelize";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -139,10 +140,67 @@ const getListingInfo = async (listingId) => {
     return listing;
 }
 
+const processListingSearchConditions = (address, guestsIncluded) => {
+
+    if (address != "" && guestsIncluded != "") {
+        return {
+            address: { [Op.like]: `%${address}%` },
+            guestsIncluded: { [Op.gte]: guestsIncluded }
+        };
+    } else if (address != "" && guestsIncluded == "") {
+        return {
+            address: { [Op.like]: `%${address}%` },
+        };
+    } else if (guestsIncluded != "" && address == "") {
+        return {
+            guestsIncluded: { [Op.gte]: guestsIncluded }
+        };
+    } else {
+        return {};
+    }
+
+};
+
+const searchListings = async (location, checkIn, checkOut, guests) => {
+    const listingSearchCondition = processListingSearchConditions(location, guests);
+
+    const listings = await Listing.findAll(
+        {
+            where: listingSearchCondition
+        },
+        {
+            include: [
+                {
+                    model: ListingImage,
+                    as: 'images'
+                },
+                {
+                    model: ListingAmenity,
+                    as: 'amenities'
+                }
+            ]
+        }
+    );
+
+    if (checkIn != "" && checkOut != "") {
+        const accessToken = await HostAwayClient.getAccessToken();
+        for (const listing of listings) {
+            const isAvailable = await HostAwayClient.checkAvailability(accessToken, listing.id, checkIn, checkOut);
+            listing.isAvailable = isAvailable;
+        }
+
+        const availableListings = listings.filter(listing => listing.isAvailable);
+        return availableListings;
+    }
+
+    return listings;
+}
+
 const listingService = {
     syncHostAwayListing,
     getListings,
-    getListingInfo
+    getListingInfo,
+    searchListings
 };
 
 export default listingService;
