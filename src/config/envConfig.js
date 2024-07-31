@@ -6,6 +6,9 @@ const _config = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     HOSTAWAY_CLIENT_ID: process.env.HOSTAWAY_CLIENT_ID,
     HOSTAWAY_CLIENT_SECRET: process.env.HOSTAWAY_CLIENT_SECRET,
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_TO: process.env.EMAIL_TO,
 };
 
 export const config = Object.freeze(_config);
