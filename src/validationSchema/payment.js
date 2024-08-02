@@ -15,3 +15,18 @@ export const createPaymentIntentSchema = Joi.object({
     }),
     currency: Joi.string().required(),
 });
+
+export const createCustomerSchema = Joi.object({
+    firstName: Joi.string().required().min(2).max(50).messages({
+        'string.min': 'First name must be at least 2 characters long',
+        'string.max': 'First name must be at most 50 characters long',
+    }),
+    lastName: Joi.string().required().min(2).max(50).messages({
+        'string.min': 'Last name must be at least 2 characters long',
+        'string.max': 'Last name must be at most 50 characters long',
+    }),
+    email: Joi.string().required().email().messages({
+        'string.email': 'Invalid email address format',
+    }),
+    phone: Joi.string().required(),
+});
