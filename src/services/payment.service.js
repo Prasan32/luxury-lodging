@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { config } from "../config/envConfig.js";
 import logger from "../config/winstonLoggerConfig.js";
+import { PaymentInfo } from "../models/index.js";
 
 const stripe = Stripe(config.STRIPE_SECRET_KEY);
 
@@ -67,9 +68,46 @@ const createCustomer = async (requestObj) => {
     }
 }
 
+const savePaymentInfo = async (requestObj) => {
+    const {
+        guestName,
+        guestEmail,
+        guestPhone,
+        listingId,
+        checkInDate,
+        checkOutDate,
+        guests,
+        paymentIntentId,
+        customerId,
+        paymentMethod,
+        amount,
+        currency,
+        paymentStatus
+    } = requestObj;
+
+    const paymentInfo = await PaymentInfo.create({
+        guestName,
+        guestEmail,
+        guestPhone,
+        listingId,
+        checkInDate,
+        checkOutDate,
+        guests,
+        paymentIntentId,
+        customerId,
+        paymentMethod,
+        amount,
+        currency,
+        paymentStatus
+    });
+
+    return paymentInfo;
+}
+
 const paymentServices = {
     createPaymentIntent,
-    createCustomer
+    createCustomer,
+    savePaymentInfo
 };
 
 export default paymentServices;
