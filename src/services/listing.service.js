@@ -108,7 +108,11 @@ const createListingAmenityObject = (amenity, listingId) => {
 };
 
 
-const getListings = async () => {
+const getListings = async (limit) => {
+    const searchObj = {};
+    if (limit) {
+        searchObj.limit = parseInt(limit);
+    }
     const listings = await Listing.findAll({
         include: [
             {
@@ -119,7 +123,8 @@ const getListings = async () => {
                 model: ListingAmenity,
                 as: 'amenities'
             }
-        ]
+        ],
+        ...searchObj
     });
     return listings;
 }
