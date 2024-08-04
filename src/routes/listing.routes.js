@@ -7,12 +7,12 @@ import {
     syncHostAwayListing
 } from "../controllers/listing.controller.js";
 import { validateQuery } from "../middlewares/validation.js";
-import { getAvailableListingsSchema } from "../validationSchema/listing.js";
+import { getAvailableListingsSchema, getListingSchema } from "../validationSchema/listing.js";
 const router = Router();
 
 router.route('/synclisting').get(syncHostAwayListing);
 
-router.route('/').get(getListings);
+router.route('/').get(validateQuery(getListingSchema), getListings);
 
 router.route('/count').get(getListingCount);
 

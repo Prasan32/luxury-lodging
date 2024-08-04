@@ -108,11 +108,14 @@ const createListingAmenityObject = (amenity, listingId) => {
 };
 
 
-const getListings = async (limit) => {
+const getListings = async (page, limit) => {
     const searchObj = {};
-    if (limit) {
+    
+    if (page && limit) {
         searchObj.limit = parseInt(limit);
+        searchObj.offset = (parseInt(page) - 1) * parseInt(limit);
     }
+
     const listings = await Listing.findAll({
         include: [
             {

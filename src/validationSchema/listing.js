@@ -15,3 +15,16 @@ export const getAvailableListingsSchema = Joi.object({
     }
     return value;
 });
+
+export const getListingSchema = Joi.object({
+    page: Joi.number(),
+    limit: Joi.number()
+}).custom((value, helpers) => {
+    if (value.page && value.page !== "" && (value.limit == undefined || value.limit == "")) {
+        return helpers.message({ custom: '"limit" must be provided when "page" is provided' });
+    }
+    if (value.limit && value.limit !== "" && (value.page == undefined || value.page == "")) {
+        return helpers.message({ custom: '"page" must not be empty when "limit" is provided' });
+    }
+    return value;
+});
