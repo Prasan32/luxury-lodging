@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    getListingCount,
     getListingInfo,
     getListings,
     searchListings,
@@ -12,6 +13,8 @@ const router = Router();
 router.route('/synclisting').get(syncHostAwayListing);
 
 router.route('/').get(getListings);
+
+router.route('/count').get(getListingCount);
 
 router.route('/getlistinginfo/:listingId').get(getListingInfo);
 

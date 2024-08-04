@@ -12,6 +12,11 @@ export const getListings = asyncHandler(async (req, res, next) => {
     return res.status(200).json(listings);
 });
 
+export const getListingCount = asyncHandler(async (req, res, next) => {
+    const count = await listingService.getListingCount();
+    return res.status(200).json({ count });
+});
+
 export const getListingInfo = asyncHandler(async (req, res, next) => {
     const listingId = req.params.listingId;
     const listing = await listingService.getListingInfo(listingId);

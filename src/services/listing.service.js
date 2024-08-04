@@ -129,6 +129,13 @@ const getListings = async (limit) => {
     return listings;
 }
 
+const getListingCount = async () => {
+    return await Listing.count({
+        distinct: true,
+        col: 'id'
+    });
+}
+
 const getListingInfo = async (listingId) => {
     const listing = await Listing.findByPk(listingId,{
         include: [
@@ -202,6 +209,7 @@ const searchListings = async (location, checkIn, checkOut, guests) => {
 const listingService = {
     syncHostAwayListing,
     getListings,
+    getListingCount,
     getListingInfo,
     searchListings
 };
