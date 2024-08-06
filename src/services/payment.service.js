@@ -122,7 +122,7 @@ const updatePaymentStatus = async (requestObj) => {
     return paymentInfo;
 };
 
-const handleWebhookResponses = async (requestObj) => {
+const handleWebhookResponses = async (req) => {
     try {
         const sig = req.headers['stripe-signature'];
         const endpointSecret = config.STRIPE_WEBHOOK_SECRET_KEY;
@@ -130,7 +130,7 @@ const handleWebhookResponses = async (requestObj) => {
         let event;
 
         try {
-            event = stripe.webhooks.constructEvent(requestObj, sig, endpointSecret);
+            event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
         } catch (err) {
             logger.error(`Webhook Error: ${err.message}`);
             throw err;

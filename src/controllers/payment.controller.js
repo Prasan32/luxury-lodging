@@ -22,6 +22,6 @@ export const savePaymentInfo = asyncHandler(async (req, res, next) => {
 });
 
 export const handleWebhookResponses = asyncHandler(async (req, res, next) => {
-    await paymentServices.handleWebhookResponses(req.body);
+    await paymentServices.handleWebhookResponses(req);
     return res.status(200).json({ message: "Webhook response handled successfully" });
 });
