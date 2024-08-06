@@ -124,7 +124,7 @@ const updatePaymentStatus = async (requestObj) => {
 
 const handleWebhookResponses = async (requestObj) => {
     try {
-        const event = requestObj.body;
+        const event = requestObj;
         logger.info("Received webhook event", event);
 
         const paymentIntent = event.data.object;
@@ -139,6 +139,8 @@ const handleWebhookResponses = async (requestObj) => {
             case 'payment_intent.payment_failed':
             case 'payment_intent.processing':
             case 'payment_intent.canceled':
+            case 'payment_intent.partially_funded':
+            case 'amount_capturable_updated':
             case 'payment_intent.succeeded':
                 {
                     await updatePaymentStatus({
