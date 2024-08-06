@@ -31,6 +31,17 @@ const createPaymentIntent = async (requestObj) => {
     }
 };
 
+const getPaymentIntentInfo = async (paymentIntent) => {
+    try {
+        const paymentIntentData = await stripe.paymentIntents.retrieve(paymentIntent);
+        logger.info("Retrieved payment intent", paymentIntentData);
+        return paymentIntentData;
+    } catch (error) {
+        logger.error("Error fetching payment intent", error);
+        throw error;
+    }
+}
+
 const createCustomer = async (requestObj) => {
     const { firstName, lastName, email, phone } = requestObj;
     try {
@@ -105,7 +116,8 @@ const savePaymentInfo = async (requestObj) => {
 const paymentServices = {
     createPaymentIntent,
     createCustomer,
-    savePaymentInfo
+    savePaymentInfo,
+    getPaymentIntentInfo
 };
 
 export default paymentServices;
