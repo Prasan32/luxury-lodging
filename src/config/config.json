@@ -4,7 +4,8 @@
     "password": "Admin@admin123",
     "database": "luxury_lodging",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "port": "3306"
   },
   "test": {
     "username": "root",
@@ -14,10 +15,11 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "avnadmin",
+    "password": "AVNS_QjhfDugov4WWNjcDt_4",
+    "database": "luxury_lodging",
+    "host": "luxury-lodging-luxury-lodging.g.aivencloud.com",
+    "dialect": "mysql",
+    "port": "18920"
   }
 }

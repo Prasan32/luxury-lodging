@@ -25,9 +25,6 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      id:{
-        type: Sequelize.INTEGER,
-      },
       caption: {
         type: Sequelize.STRING,
         allowNull: true,
