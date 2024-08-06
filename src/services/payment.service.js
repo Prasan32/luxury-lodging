@@ -11,9 +11,7 @@ const createPaymentIntent = async (requestObj) => {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,
             currency: currency,
-            automatic_payment_methods: {
-                enabled: true,
-            },
+            payment_method_types: ['card', 'us_bank_account', 'affirm'],
             description: `Payment Intent for booking listing:${listingId} [${checkIn}-${checkOut}][${guests}]`,
             metadata: {
                 listingId,
