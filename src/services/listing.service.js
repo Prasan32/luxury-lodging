@@ -108,12 +108,21 @@ const createListingAmenityObject = (amenity, listingId) => {
 };
 
 
-const getListings = async (page, limit) => {
+const getListings = async (page, limit, price) => {
     const searchObj = {};
     
     if (page && limit) {
         searchObj.limit = parseInt(limit);
         searchObj.offset = (parseInt(page) - 1) * parseInt(limit);
+    }
+
+    let order = [];
+    if (price) {
+        if (price === 'low-to-high') {
+            order = [['price', 'ASC']];
+        } else if (price === 'high-to-low') {
+            order = [['price', 'DESC']];
+        }
     }
 
     const listings = await Listing.findAll({
@@ -127,6 +136,7 @@ const getListings = async (page, limit) => {
                 as: 'amenities'
             }
         ],
+        order,
         ...searchObj
     });
     return listings;

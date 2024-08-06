@@ -18,7 +18,8 @@ export const getAvailableListingsSchema = Joi.object({
 
 export const getListingSchema = Joi.object({
     page: Joi.number(),
-    limit: Joi.number()
+    limit: Joi.number(),
+    price: Joi.number().valid('low-to-high', 'high-to-low'),
 }).custom((value, helpers) => {
     if (value.page && value.page !== "" && (value.limit == undefined || value.limit == "")) {
         return helpers.message({ custom: '"limit" must be provided when "page" is provided' });

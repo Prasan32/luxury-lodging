@@ -7,8 +7,8 @@ export const syncHostAwayListing = asyncHandler(async (req, res, next) => {
 })
 
 export const getListings = asyncHandler(async (req, res, next) => {
-    const { limit, page } = req.query;
-    const listings = await listingService.getListings(page, limit);
+    const { limit, page, price } = req.query;
+    const listings = await listingService.getListings(page, limit, price);
     return res.status(200).json(listings);
 });
 
