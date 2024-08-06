@@ -83,6 +83,11 @@ const createListingObject = (data) => {
         checkOutTime: data?.checkOutTime || 0,
         wifiUsername: data?.wifiUsername || "(NO WIFI)",
         wifiPassword: data?.wifiPassword || "(NO PASSWORD)",
+        roomType: data?.roomType || "",
+        bathroomType: data?.bathroomType || "",
+        bedroomsNumber: data?.bedroomsNumber,
+        bedsNumber: data?.bedsNumber,
+        bathroomsNumber: data?.bathroomsNumber,
     };
 };
 

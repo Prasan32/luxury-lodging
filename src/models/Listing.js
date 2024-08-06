@@ -76,6 +76,26 @@ const Listing = sequelize.define("Listing", {
     },
     wifiPassword:{
         type: DataTypes.STRING
+    },
+    roomType: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    bathroomType: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    bedroomsNumber: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    bedsNumber: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    bathroomsNumber: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 }, {
     tableName: "listing",
