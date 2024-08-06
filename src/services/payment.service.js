@@ -124,7 +124,19 @@ const updatePaymentStatus = async (requestObj) => {
 
 const handleWebhookResponses = async (requestObj) => {
     try {
-        const event = requestObj;
+        const sig = req.headers['stripe-signature'];
+        const endpointSecret = config.STRIPE_WEBHOOK_SECRET_KEY;
+
+        let event;
+
+        try {
+            event = stripe.webhooks.constructEvent(requestObj, sig, endpointSecret);
+        } catch (err) {
+            logger.error(`Webhook Error: ${err.message}`);
+            throw err;
+        }
+
+        event = requestObj;
         logger.info("Received webhook event", event);
 
         const paymentIntent = event.data.object;
