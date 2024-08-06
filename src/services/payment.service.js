@@ -24,7 +24,7 @@ const createPaymentIntent = async (requestObj) => {
         logger.info("Created payment intent", paymentIntent);
         logger.info(paymentIntent.id);
 
-        return { clientSecret: paymentIntent.client_secret };
+        return { clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id };
     } catch (error) {
         logger.error("Error creating payment intent", error);
         throw error;
@@ -113,11 +113,55 @@ const savePaymentInfo = async (requestObj) => {
     return paymentInfo;
 }
 
+const updatePaymentStatus = async (requestObj) => {
+    const { paymentStatus, paymentIntentId } = requestObj;
+
+    const paymentInfo = await PaymentInfo.update({ paymentStatus }, { where: { paymentIntentId } });
+    logger.info(`Payment status of PaymentIntentId: ${paymentIntentId} updated to ${paymentStatus}`);
+
+    return paymentInfo;
+};
+
+const handleWebhookResponses = async (requestObj) => {
+    try {
+        const event = requestObj.body;
+        logger.info("Received webhook event", event);
+
+        const paymentIntent = event.data.object;
+        const paymentIntentId = paymentIntent.id;
+
+
+        switch (event.type) {
+            case 'payment_intent.created':
+                console.log(`PaymentIntent ${paymentIntentId} was created`);
+                break;
+            case 'payment_intent.requires_action':
+            case 'payment_intent.payment_failed':
+            case 'payment_intent.processing':
+            case 'payment_intent.canceled':
+            case 'payment_intent.succeeded':
+                {
+                    await updatePaymentStatus({
+                        paymentStatus: paymentIntent.status,
+                        paymentIntentId: paymentIntentId
+                    });
+                    break;
+                }
+            default:
+                console.log(`Unhandled event type ${event.type} for PaymentIntent ${paymentIntentId}`);
+        }
+    } catch (error) {
+        logger.error("Error handling webhook response", error);
+        throw error;
+    }
+}
+
 const paymentServices = {
     createPaymentIntent,
     createCustomer,
     savePaymentInfo,
-    getPaymentIntentInfo
+    getPaymentIntentInfo,
+    handleWebhookResponses
 };
 
 export default paymentServices;
