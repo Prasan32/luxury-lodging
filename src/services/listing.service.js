@@ -108,7 +108,7 @@ const createListingAmenityObject = (amenity, listingId) => {
 };
 
 
-const getListings = async (page, limit, price) => {
+const getListings = async (page, limit, priceOrder) => {
     const searchObj = {};
     
     if (page && limit) {
@@ -117,10 +117,10 @@ const getListings = async (page, limit, price) => {
     }
 
     let order = [];
-    if (price) {
-        if (price === 'low-to-high') {
+    if (priceOrder) {
+        if (priceOrder === 'low-to-high') {
             order = [['price', 'ASC']];
-        } else if (price === 'high-to-low') {
+        } else if (priceOrder === 'high-to-low') {
             order = [['price', 'DESC']];
         }
     }
@@ -186,8 +186,17 @@ const processListingSearchConditions = (address, guestsIncluded) => {
 
 };
 
-const searchListings = async (location, checkIn, checkOut, guests) => {
+const searchListings = async (location, checkIn, checkOut, guests, priceOrder) => {
     const listingSearchCondition = processListingSearchConditions(location, guests);
+
+    let order = [];
+    if (priceOrder) {
+        if (priceOrder === 'low-to-high') {
+            order = [['price', 'ASC']];
+        } else if (priceOrder === 'high-to-low') {
+            order = [['price', 'DESC']];
+        }
+    }
 
     const listings = await Listing.findAll(
         {
@@ -201,7 +210,8 @@ const searchListings = async (location, checkIn, checkOut, guests) => {
                     model: ListingAmenity,
                     as: 'amenities'
                 }
-            ]
+            ],
+            order
         },
     );
 

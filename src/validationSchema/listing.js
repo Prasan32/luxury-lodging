@@ -9,9 +9,13 @@ export const getAvailableListingsSchema = Joi.object({
         'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
     }).required().allow(""),
     guests: Joi.number().required().min(1).max(50).allow(""),
+    priceOrder: Joi.string().valid('low-to-high', 'high-to-low').required().allow(""),
 }).custom((value, helpers) => {
     if (value.checkIn !== "" && value.checkOut === "") {
         return helpers.message({ custom: '"checkOut" must not be empty when "checkIn" is provided' });
+    }
+    if (value.checkOut !== "" && value.checkIn === "") {
+        return helpers.message({ custom: '"checkIn" must not be empty when "checkOut" is provided' });
     }
     return value;
 });
@@ -19,7 +23,7 @@ export const getAvailableListingsSchema = Joi.object({
 export const getListingSchema = Joi.object({
     page: Joi.number(),
     limit: Joi.number(),
-    price: Joi.number().valid('low-to-high', 'high-to-low'),
+    priceOrder: Joi.string().valid('low-to-high', 'high-to-low'),
 }).custom((value, helpers) => {
     if (value.page && value.page !== "" && (value.limit == undefined || value.limit == "")) {
         return helpers.message({ custom: '"limit" must be provided when "page" is provided' });

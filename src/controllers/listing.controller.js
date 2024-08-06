@@ -7,8 +7,8 @@ export const syncHostAwayListing = asyncHandler(async (req, res, next) => {
 })
 
 export const getListings = asyncHandler(async (req, res, next) => {
-    const { limit, page, price } = req.query;
-    const listings = await listingService.getListings(page, limit, price);
+    const { limit, page, priceOrder } = req.query;
+    const listings = await listingService.getListings(page, limit, priceOrder);
     return res.status(200).json(listings);
 });
 
@@ -29,7 +29,7 @@ export const getListingInfo = asyncHandler(async (req, res, next) => {
 });
 
 export const searchListings = asyncHandler(async (req, res, next) => {
-    const { location, checkIn, checkOut, guests } = req.query;
-    const listings = await listingService.searchListings(location, checkIn, checkOut, guests);
+    const { location, checkIn, checkOut, guests, priceOrder } = req.query;
+    const listings = await listingService.searchListings(location, checkIn, checkOut, guests, priceOrder);
     return res.status(200).json(listings);
 });
