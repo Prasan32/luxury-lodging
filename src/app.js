@@ -11,7 +11,7 @@ app.use(helmet());
 
 // Add this route before the appRoutes to ensure raw body for the webhook
 app.post('payment/handlewebhookresponses', express.raw({ type: 'application/json' }), handleWebhookResponses);
-
+console.log('after webhook response');
 app.use(express.json());
 app.use(appRoutes)
 
