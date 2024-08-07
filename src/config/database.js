@@ -1,14 +1,13 @@
 // config/database.js
 import { Sequelize } from 'sequelize';
-import config from './config.json' assert { type: 'json' };;
 import { config as envConfig } from "./envConfig.js";
 
-const environment = envConfig.NODE_ENV;
-const { username, password, database, host, dialect, port } = config[environment];
-const sequelize = new Sequelize(database, username, password, {
-    host,
-    dialect,
-    port
-});
+const { DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME } = envConfig;
+const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, {
+    DATABASE_HOST,
+    dialect: 'mysql',
+    DATABASE_PORT,
+    logging: false
+}); 
 
 export default sequelize;
