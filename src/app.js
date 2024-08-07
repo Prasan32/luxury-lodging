@@ -7,17 +7,7 @@ const app = express();
 
 app.use(cors());
 app.use(helmet());
-app.use((req, res, next) => {
-    if (req.url == "/payment/handlewebhookresponses") {
-        console.log("inside raw");
-        app.use(express.raw({ type: 'application/json' }));
-    } else {
-        console.log("inside json");
-        app.use(express.json());
-    }
-    next();
-});
-
+app.use(express.json());
 
 app.use(appRoutes)
 
