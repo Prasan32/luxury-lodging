@@ -83,30 +83,25 @@ const checkAvailability = async (accessToken, listingId, checkInDate, checkOutDa
         });
 
         const reservations = response.data.result;
-        const isAvailable = reservations.every(reservation => {
+        checkInDate = new Date(checkInDate);
+        checkOutDate = new Date(checkOutDate);
 
-            const reservationCheckInStart = new Date(reservation.arrivalStartDate);
-            const reservationCheckInEnd = new Date(reservation.arrivalEndDate);
-            const reservationCheckOutStart = new Date(reservation.departureStartDate);
-            const reservationCheckOutEnd = new Date(reservation.departureEndDate);
+        // Function to check if two date ranges overlap
+        function isOverlap(start1, end1, start2, end2) {
+            return start1 < end2 && start2 < end1;
+        }
 
-            const requestedCheckIn = new Date(checkInDate);
-            const requestedCheckOut = new Date(checkOutDate);
+        // Check each reservation for overlaps
+        for (const reservation of reservations) {
+            const reservationCheckIn = new Date(reservation.arrivalDate);
+            const reservationCheckOut = new Date(reservation.departureDate);
 
-            return (
-                (
-                    requestedCheckOut <= reservationCheckInStart &&
-                    requestedCheckOut <= reservationCheckInEnd
+            if (isOverlap(checkInDate, checkOutDate, reservationCheckIn, reservationCheckOut)) {
+                return false;
+            }
+        }
 
-                ) &&
-                (
-                    requestedCheckIn >= reservationCheckOutStart &&
-                    requestedCheckIn >= reservationCheckOutEnd
-                )
-            );
-        });
-
-        return isAvailable;
+        return true;
     } catch (error) {
         logger.error(`Error checking availability of listing for id ${listingId}`, error);
         return null;
