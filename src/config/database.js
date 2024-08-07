@@ -8,7 +8,8 @@ const { username, password, database, host, dialect, port } = config[environment
 const sequelize = new Sequelize(database, username, password, {
     host,
     dialect,
-    port
+    port,
+    logging: false
 });
 
 export default sequelize;
