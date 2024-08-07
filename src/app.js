@@ -9,9 +9,24 @@ import { handleWebhookResponses } from "./controllers/payment.controller.js";
 app.use(cors());
 app.use(helmet());
 
-// Add this route before the appRoutes to ensure raw body for the webhook
-app.post('payment/handlewebhookresponses', express.raw({ type: 'application/json' }), handleWebhookResponses);
-console.log('after webhook response');
+const rawBodyMiddleware = (req, res, next) => {
+    if (req.path === '/payment/handlewebhookresponses') {
+        let data = '';
+        req.on('data', (chunk) => {
+            data += chunk;
+        });
+        req.on('end', () => {
+            console.log('inside the raw body middleware');
+            handleWebhookResponses(req, res, next);
+        });
+    } else {
+        next();
+    }
+};
+
+
+app.use(rawBodyMiddleware);
+
 app.use(express.json());
 app.use(appRoutes)
 
