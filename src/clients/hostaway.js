@@ -108,11 +108,38 @@ const checkAvailability = async (accessToken, listingId, checkInDate, checkOutDa
     }
 };
 
+const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
+    const url = `${HOSTAWAY_API_URL}/listings/${listingId}/calendar/priceDetails`;
+    const requestBody = {
+        startingDate: new Date(checkIn),
+        endingDate: new Date(checkOut),
+        numberOfGuests: guests,
+        verion: 2
+    };
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.post(url, requestBody, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error calculating price of listingId: ${listingId} for [${checkIn}-${checkOut}][guests:${guests}]`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
     getListingInfo,
-    checkAvailability
+    checkAvailability,
+    calculatePrice
 };
 
 export default HostAwayClient;

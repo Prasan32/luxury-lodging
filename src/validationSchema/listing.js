@@ -43,3 +43,14 @@ export const checkAvailabilitySchema = Joi.object({
         'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
     }).required(),
 });
+
+export const calculatePriceSchema = Joi.object({
+    listingId: Joi.number().required(),
+    checkIn: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
+        'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
+    }).required(),
+    checkOut: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
+        'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
+    }).required(),
+    guests: Joi.number().required().min(1).max(50).required(),
+});

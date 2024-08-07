@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    calculatePrice,
     checkAvailability,
     getListingCount,
     getListingInfo,
@@ -7,8 +8,8 @@ import {
     searchListings,
     syncHostAwayListing
 } from "../controllers/listing.controller.js";
-import { validateQuery } from "../middlewares/validation.js";
-import { checkAvailabilitySchema, getAvailableListingsSchema, getListingSchema } from "../validationSchema/listing.js";
+import { validate, validateQuery } from "../middlewares/validation.js";
+import { calculatePriceSchema, checkAvailabilitySchema, getAvailableListingsSchema, getListingSchema } from "../validationSchema/listing.js";
 const router = Router();
 
 router.route('/synclisting').get(syncHostAwayListing);
@@ -22,5 +23,7 @@ router.route('/getlistinginfo/:listingId').get(getListingInfo);
 router.route('/getavailablelistings').get(validateQuery(getAvailableListingsSchema), searchListings);
 
 router.route('/checkavailability').get(validateQuery(checkAvailabilitySchema), checkAvailability);
+
+router.route('/calculateprice').post(validate(calculatePriceSchema), calculatePrice);
 
 export default router;
