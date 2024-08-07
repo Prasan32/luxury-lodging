@@ -7,7 +7,13 @@ const app = express();
 
 app.use(cors());
 app.use(helmet());
-app.use(express.json());
+app.use((req, res, next) => {
+    if (req.url !== "/payment/handlewebhookresponses") {
+        app.use(express.json());
+    }
+    next();
+});
+
 
 app.use(appRoutes)
 
