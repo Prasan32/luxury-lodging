@@ -11,15 +11,8 @@ app.use(helmet());
 
 const rawBodyMiddleware = (req, res, next) => {
     if (req.path === '/payment/handlewebhookresponses') {
-        let data = '';
-        req.on('data', (chunk) => {
-            data += chunk;
-        });
-        req.on('end', () => {
-            console.log('inside the raw body middleware');
-            req.body = data;
-            handleWebhookResponses(req, res, next);
-        });
+        app.use(express.raw({ type: 'application/json' }));
+        handleWebhookResponses(req, res, next);
     } else {
         next();
     }
