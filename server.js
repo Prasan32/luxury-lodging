@@ -15,7 +15,11 @@ function server() {
                 logger.info(`Database Name: ${config.DATABASE_NAME}`);
                 logger.info(`Server is running on port ${config.PORT}`);
             });
-        }).catch(() => {
+        }).catch((error) => {
+            logger.error("Error connecting to the database:", error);
+            logger.info(`NODE_ENV: ${config.NODE_ENV}`);
+            logger.info(`Database Host: ${config.DATABASE_HOST}`);
+            logger.info(`Database Name: ${config.DATABASE_NAME}`);
             logger.error("Unable to connect to the database.");
             process.exit(1);
         });
