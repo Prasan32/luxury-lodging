@@ -7,8 +7,11 @@ const app = express();
 
 app.use(cors());
 app.use(helmet());
-app.use(express.json());
 
+// Add this route before the appRoutes to ensure raw body for the webhook
+app.post('payment/handlewebhookresponses', express.raw({ type: 'application/json' }));
+
+app.use(express.json());
 app.use(appRoutes)
 
 app.use(globalErrorHandler);
