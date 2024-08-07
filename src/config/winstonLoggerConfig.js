@@ -11,28 +11,28 @@ const myFormat = printf(({ level, message, timestamp }) => {
 
 let logger;
 
-if (config.NODE_ENV === 'production') {
-    const dailyRotateFileTransport = new DailyRotateFile({
-        filename: './logs/application-%DATE%.log',
-        datePattern: 'YYYY-MM-DD',
-        zippedArchive: true,
-        maxSize: '20m',
-    });
+// if (config.NODE_ENV === 'production') {
+//     const dailyRotateFileTransport = new DailyRotateFile({
+//         filename: './logs/application-%DATE%.log',
+//         datePattern: 'YYYY-MM-DD',
+//         zippedArchive: true,
+//         maxSize: '20m',
+//     });
 
-    logger = createLogger({
-        level: 'info',
-        format: combine(
-            timestamp(),
-            myFormat,
-        ),
-        transports: [
-            dailyRotateFileTransport
-        ],
-        exceptionHandlers: [
-            dailyRotateFileTransport
-        ]
-    });
-} else {
+//     logger = createLogger({
+//         level: 'info',
+//         format: combine(
+//             timestamp(),
+//             myFormat,
+//         ),
+//         transports: [
+//             dailyRotateFileTransport
+//         ],
+//         exceptionHandlers: [
+//             dailyRotateFileTransport
+//         ]
+//     });
+// } else {
     logger = createLogger({
         level: 'info',
         format: combine(
@@ -60,7 +60,7 @@ if (config.NODE_ENV === 'production') {
             })
         ]
     });
-}
+// }
 
 
 export default logger;
