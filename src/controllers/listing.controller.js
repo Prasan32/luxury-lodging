@@ -33,3 +33,9 @@ export const searchListings = asyncHandler(async (req, res, next) => {
     const listings = await listingService.searchListings(location, checkIn, checkOut, guests, priceOrder);
     return res.status(200).json(listings);
 });
+
+export const checkAvailability = asyncHandler(async (req, res, next) => {
+    const { listingId, checkIn, checkOut } = req.query;
+    const isAvailable = await listingService.checkAvailability(listingId, checkIn, checkOut);
+    return res.status(200).json({ isAvailable });
+});

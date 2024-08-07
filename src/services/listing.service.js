@@ -234,12 +234,19 @@ const searchListings = async (location, checkIn, checkOut, guests, priceOrder) =
     return listings;
 }
 
+const checkAvailability = async (listingId, checkIn, checkOut) => {
+    const accessToken = await HostAwayClient.getAccessToken();
+    const isAvailable = await HostAwayClient.checkAvailability(accessToken, listingId, checkIn, checkOut);
+    return isAvailable;
+}
+
 const listingService = {
     syncHostAwayListing,
     getListings,
     getListingCount,
     getListingInfo,
-    searchListings
+    searchListings,
+    checkAvailability
 };
 
 export default listingService;
