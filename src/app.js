@@ -17,6 +17,7 @@ const rawBodyMiddleware = (req, res, next) => {
         });
         req.on('end', () => {
             console.log('inside the raw body middleware');
+            req.body = data;
             handleWebhookResponses(req, res, next);
         });
     } else {
