@@ -12,6 +12,4 @@ router.route('/createcustomer').post(validate(createCustomerSchema), createCusto
 
 router.route('/savepaymentinfo').post(validate(savePaymentInfoSchema), savePaymentInfo)
 
-router.route('/handlewebhookresponses').post(express.raw({ type: 'application/json' }), handleWebhookResponses)
-
 export default router;

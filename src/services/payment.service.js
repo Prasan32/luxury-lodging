@@ -126,9 +126,6 @@ const handleWebhookResponses = async (req) => {
     try {
         const sig = req.headers['stripe-signature'];
         const endpointSecret = config.STRIPE_WEBHOOK_SECRET_KEY;
-        console.log(req.body);
-        console.log(sig);
-        console.log(endpointSecret)
 
         let event;
 
