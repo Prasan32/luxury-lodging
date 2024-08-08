@@ -45,3 +45,9 @@ export const calculatePrice = asyncHandler(async (req, res, next) => {
     const priceDetails = await listingService.calculatePrice(listingId, checkIn, checkOut, guests);
     return res.status(200).json(priceDetails);
 });
+
+export const getCalendar = asyncHandler(async (req, res, next) => {
+    const { listingId } = req.params;
+    const calendar = await listingService.getCalendar(listingId);
+    return res.status(200).json(calendar);
+});

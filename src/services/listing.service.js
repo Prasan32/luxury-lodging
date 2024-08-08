@@ -245,6 +245,11 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
     return priceDetails;
 }
 
+const getCalendar = async (listingId) => {
+    const calendar = await HostAwayClient.getCalendar(listingId);
+    return calendar;
+}
+
 const listingService = {
     syncHostAwayListing,
     getListings,
@@ -252,7 +257,8 @@ const listingService = {
     getListingInfo,
     searchListings,
     checkAvailability,
-    calculatePrice
+    calculatePrice,
+    getCalendar
 };
 
 export default listingService;

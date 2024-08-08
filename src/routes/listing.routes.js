@@ -5,6 +5,7 @@ import {
     getListingCount,
     getListingInfo,
     getListings,
+    getCalendar,
     searchListings,
     syncHostAwayListing
 } from "../controllers/listing.controller.js";
@@ -25,5 +26,7 @@ router.route('/getavailablelistings').get(validateQuery(getAvailableListingsSche
 router.route('/checkavailability').get(validateQuery(checkAvailabilitySchema), checkAvailability);
 
 router.route('/calculateprice').post(validate(calculatePriceSchema), calculatePrice);
+
+router.route('/getcalendar/:listingId').get(getCalendar);
 
 export default router;
