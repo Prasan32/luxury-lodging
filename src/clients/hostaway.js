@@ -195,6 +195,26 @@ const getCountries = async () => {
     }
 }
 
+const getReviews = async (type) => {
+    const url = `${HOSTAWAY_API_URL}/reviews?type=${type}`;
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error fetching reviews`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -203,7 +223,8 @@ const HostAwayClient = {
     calculatePrice,
     getCalendar,
     getAmenities,
-    getCountries
+    getCountries,
+    getReviews
 };
 
 export default HostAwayClient;

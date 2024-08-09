@@ -60,3 +60,8 @@ export const getCountries = asyncHandler(async (req, res, next) => {
     const countries = await listingService.getCountries();
     return res.status(200).json(countries);
 });
+
+export const getReviews = asyncHandler(async (req, res, next) => {
+    const reviews = await listingService.getReviews(req.query);
+    return res.status(200).json(reviews);
+});
