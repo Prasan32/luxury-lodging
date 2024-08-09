@@ -8,7 +8,8 @@ import {
     getCalendar,
     searchListings,
     syncHostAwayListing,
-    getAmenities
+    getAmenities,
+    getCountries
 } from "../controllers/listing.controller.js";
 import { validate, validateQuery } from "../middlewares/validation.js";
 import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema } from "../validationSchema/listing.js";
@@ -31,5 +32,7 @@ router.route('/calculateprice').post(validate(calculatePriceSchema), calculatePr
 router.route('/getcalendar/:listingId').get(getCalendar);
 
 router.route('/amenities').get(getAmenities);
+
+router.route('/getcountries').get(getCountries)
 
 export default router;

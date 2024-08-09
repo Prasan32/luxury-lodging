@@ -175,6 +175,26 @@ const getAmenities = async () => {
     }
 };
 
+const getCountries = async () => {
+    const url = `${HOSTAWAY_API_URL}/countries`;
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error fetching countries`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -182,7 +202,8 @@ const HostAwayClient = {
     checkAvailability,
     calculatePrice,
     getCalendar,
-    getAmenities
+    getAmenities,
+    getCountries
 };
 
 export default HostAwayClient;

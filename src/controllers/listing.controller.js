@@ -55,3 +55,8 @@ export const getAmenities = asyncHandler(async (req, res, next) => {
     const amenities = await listingService.getAmenities();
     return res.status(200).json(amenities);
 });
+
+export const getCountries = asyncHandler(async (req, res, next) => {
+    const countries = await listingService.getCountries();
+    return res.status(200).json(countries);
+});

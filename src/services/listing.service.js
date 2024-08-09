@@ -268,6 +268,11 @@ const getAmenities = async () => {
     return amenities;
 }
 
+const getCountries = async () => {
+    const countries = await HostAwayClient.getCountries();
+    return countries;
+}
+
 const listingService = {
     syncHostAwayListing,
     getListings,
@@ -277,7 +282,8 @@ const listingService = {
     checkAvailability,
     calculatePrice,
     getCalendar,
-    getAmenities
+    getAmenities,
+    getCountries
 };
 
 export default listingService;
