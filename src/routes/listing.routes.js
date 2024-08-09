@@ -11,7 +11,7 @@ import {
     getAmenities
 } from "../controllers/listing.controller.js";
 import { validate, validateQuery } from "../middlewares/validation.js";
-import { calculatePriceSchema, checkAvailabilitySchema, getAvailableListingsSchema, getListingSchema } from "../validationSchema/listing.js";
+import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema } from "../validationSchema/listing.js";
 const router = Router();
 
 router.route('/synclisting').get(syncHostAwayListing);
@@ -22,7 +22,7 @@ router.route('/count').get(getListingCount);
 
 router.route('/getlistinginfo/:listingId').get(getListingInfo);
 
-router.route('/getavailablelistings').get(validateQuery(getAvailableListingsSchema), searchListings);
+router.route('/searchlistings').post(validate(searchListingsSchema), searchListings);
 
 router.route('/checkavailability').get(validateQuery(checkAvailabilitySchema), checkAvailability);
 

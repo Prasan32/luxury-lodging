@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const getAvailableListingsSchema = Joi.object({
+export const searchListingsSchema = Joi.object({
     location: Joi.string().required().allow(""),
     checkIn: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
         'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
@@ -10,6 +10,11 @@ export const getAvailableListingsSchema = Joi.object({
     }).required().allow(""),
     guests: Joi.number().required().min(1).max(50).allow(""),
     priceOrder: Joi.string().valid('low-to-high', 'high-to-low').required().allow(""),
+    bedrooms: Joi.number().required().allow(""),
+    roomType: Joi.string().required().allow("").valid("entire_home", "private_room","shared_room"),
+    minPrice: Joi.number().required().allow(""),
+    maxPrice: Joi.number().required().allow(""),
+    amenities: Joi.array().items(Joi.number().required()).required().min(0).allow(""),
 }).custom((value, helpers) => {
     if (value.checkIn !== "" && value.checkOut === "") {
         return helpers.message({ custom: '"checkOut" must not be empty when "checkIn" is provided' });
@@ -17,6 +22,15 @@ export const getAvailableListingsSchema = Joi.object({
     if (value.checkOut !== "" && value.checkIn === "") {
         return helpers.message({ custom: '"checkIn" must not be empty when "checkOut" is provided' });
     }
+
+    if (value.minPrice !== "" && value.maxPrice === "") {
+        return helpers.message({ custom: '"maxPrice" must not be empty when "minPrice" is provided' });
+    }
+
+    if (value.maxPrice !== "" && value.minPrice === "") {
+        return helpers.message({ custom: '"minPrice" must not be empty when "maxPrice" is provided' });
+    }
+
     return value;
 });
 

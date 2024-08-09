@@ -29,8 +29,7 @@ export const getListingInfo = asyncHandler(async (req, res, next) => {
 });
 
 export const searchListings = asyncHandler(async (req, res, next) => {
-    const { location, checkIn, checkOut, guests, priceOrder } = req.query;
-    const listings = await listingService.searchListings(location, checkIn, checkOut, guests, priceOrder);
+    const listings = await listingService.searchListings(req.body);
     return res.status(200).json(listings);
 });
 

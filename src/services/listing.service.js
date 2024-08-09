@@ -170,29 +170,18 @@ const getListingInfo = async (listingId) => {
     return listing;
 }
 
-const processListingSearchConditions = (address, guestsIncluded) => {
+const processSearchConditions = (address, guestsIncluded, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities) => {
+    const listingSearchCondition = {
+        ...(address !== "" && { address: { [Op.like]: `%${address}%` } }),
+        ...(guestsIncluded !== "" && { guestsIncluded: { [Op.gte]: guestsIncluded } }),
+        ...(bedroomsNumber !== "" && { bedroomsNumber: { [Op.gte]: bedroomsNumber } }),
+        ...(roomType !== "" && { roomType: { [Op.eq]: roomType } }),
+        ...(minPrice !== "" && { price: { [Op.between]: [minPrice, maxPrice] } }),
+    };
 
-    if (address != "" && guestsIncluded != "") {
-        return {
-            address: { [Op.like]: `%${address}%` },
-            guestsIncluded: { [Op.gte]: guestsIncluded }
-        };
-    } else if (address != "" && guestsIncluded == "") {
-        return {
-            address: { [Op.like]: `%${address}%` },
-        };
-    } else if (guestsIncluded != "" && address == "") {
-        return {
-            guestsIncluded: { [Op.gte]: guestsIncluded }
-        };
-    } else {
-        return {};
-    }
-
-};
-
-const searchListings = async (location, checkIn, checkOut, guests, priceOrder) => {
-    const listingSearchCondition = processListingSearchConditions(location, guests);
+    const listingAmenitySearchCondition = {
+        ...(amenities !== "" && { amenityId: { [Op.in]: amenities } })
+    };
 
     let order = [];
     if (priceOrder) {
@@ -202,6 +191,29 @@ const searchListings = async (location, checkIn, checkOut, guests, priceOrder) =
             order = [['price', 'DESC']];
         }
     }
+
+    return { listingSearchCondition, listingAmenitySearchCondition, order };
+};
+
+const searchListings = async (requestObj) => {
+    const {
+        location,
+        checkIn,
+        checkOut,
+        guests,
+        priceOrder,
+        bedrooms,
+        roomType,
+        minPrice,
+        maxPrice,
+        amenities
+    } = requestObj;
+
+    const {
+        listingSearchCondition,
+        listingAmenitySearchCondition,
+        order
+    } = processSearchConditions(location, guests, priceOrder, bedrooms, roomType, minPrice, maxPrice, amenities);
 
     const listings = await Listing.findAll(
         {
@@ -213,7 +225,8 @@ const searchListings = async (location, checkIn, checkOut, guests, priceOrder) =
                 },
                 {
                     model: ListingAmenity,
-                    as: 'amenities'
+                    as: 'amenities',
+                    where: listingAmenitySearchCondition
                 }
             ],
             order
