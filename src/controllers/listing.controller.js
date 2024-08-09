@@ -51,3 +51,8 @@ export const getCalendar = asyncHandler(async (req, res, next) => {
     const calendar = await listingService.getCalendar(listingId);
     return res.status(200).json(calendar);
 });
+
+export const getAmenities = asyncHandler(async (req, res, next) => {
+    const amenities = await listingService.getAmenities();
+    return res.status(200).json(amenities);
+});

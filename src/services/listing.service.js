@@ -250,6 +250,11 @@ const getCalendar = async (listingId) => {
     return calendar;
 }
 
+const getAmenities = async () => {
+    const amenities = await HostAwayClient.getAmenities();
+    return amenities;
+}
+
 const listingService = {
     syncHostAwayListing,
     getListings,
@@ -258,7 +263,8 @@ const listingService = {
     searchListings,
     checkAvailability,
     calculatePrice,
-    getCalendar
+    getCalendar,
+    getAmenities
 };
 
 export default listingService;

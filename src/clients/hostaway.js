@@ -155,13 +155,34 @@ const getCalendar = async (listingId) => {
     }
 };
 
+const getAmenities = async () => {
+    const url = `${HOSTAWAY_API_URL}/amenities`;
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error fetching amenities`, error);
+        return null;
+    }
+};
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
     getListingInfo,
     checkAvailability,
     calculatePrice,
-    getCalendar
+    getCalendar,
+    getAmenities
 };
 
 export default HostAwayClient;
