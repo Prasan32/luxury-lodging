@@ -270,7 +270,10 @@ const getAmenities = async () => {
 
 const getCountries = async () => {
     const countries = await HostAwayClient.getCountries();
-    return countries;
+    const countryArray = Object.entries(countries).map(([code, country]) => {
+        return { country, code };
+    });
+    return countryArray;
 }
 
 const getReviews = async (queryObj) => {
