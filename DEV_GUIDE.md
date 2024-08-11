@@ -60,3 +60,17 @@ in the sendgrid.
 The enviroment variable EMAIL_TO should be provided with the email address where you want the email to be 
 sent when any user submits the contact form from the application.
 ----------------------------------------------------------------------------------------------------------
+
+
+## WHITELIST REQUEST URLs
+---------------------------------------------------------------------------------------------------------
+Update the environment variable CORS_WHITELIST with the base URL of the frontend
+For example: If the frontend URL is http://localhost:5174 then 
+             CORS_WHITELIST=http://localhost:5174
+
+If you want to add more than one whitelist URL then you can specify multiple URLs separated by commas.
+For example: If you want to add http://localhost:5173 and http://localhost:5174 then
+             CORS_WHITELIST=http://localhost:5173,http://localhost:5174
+
+NOTE: Don't use space after the comma else it will not whitelist the later url after the comma.
+---------------------------------------------------------------------------------------------------------
