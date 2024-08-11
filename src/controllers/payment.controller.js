@@ -25,3 +25,8 @@ export const handleWebhookResponses = asyncHandler(async (req, res, next) => {
     await paymentServices.handleWebhookResponses(req);
     return res.status(200).json({ message: "Webhook response handled successfully" });
 });
+
+export const getStripePublishableKey = asyncHandler(async (req, res, next) => {
+    const publishableKey = paymentServices.getStripePublishableKey();
+    return res.status(200).json({ publishableKey });
+});

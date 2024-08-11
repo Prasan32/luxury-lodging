@@ -31,6 +31,10 @@ const createPaymentIntent = async (requestObj) => {
     }
 };
 
+const getStripePublishableKey = () => {
+    return config.STRIPE_PUBLISHABLE_KEY;
+}
+
 const getPaymentIntentInfo = async (paymentIntent) => {
     try {
         const paymentIntentData = await stripe.paymentIntents.retrieve(paymentIntent);
@@ -172,7 +176,8 @@ const paymentServices = {
     createCustomer,
     savePaymentInfo,
     getPaymentIntentInfo,
-    handleWebhookResponses
+    handleWebhookResponses,
+    getStripePublishableKey
 };
 
 export default paymentServices;
