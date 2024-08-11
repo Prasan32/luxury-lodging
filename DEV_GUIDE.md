@@ -64,6 +64,8 @@ sent when any user submits the contact form from the application.
 
 ## WHITELIST REQUEST URLs
 ---------------------------------------------------------------------------------------------------------
+For NODE_ENV other than development, you need to whitelist the request URLs.
+
 Update the environment variable CORS_WHITELIST with the base URL of the frontend
 For example: If the frontend URL is http://localhost:5174 then 
              CORS_WHITELIST=http://localhost:5174

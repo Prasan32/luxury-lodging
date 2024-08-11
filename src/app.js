@@ -20,8 +20,8 @@ const corsOptions = {
     optionsSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions));
-app.use((req, res, next) => {
+app.use(cors(config.NODE_ENV === "development" ? {} : corsOptions));
+config.NODE_ENV !== "development" && app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (!origin) {
         return res.status(403).json({ message: 'Forbidden' });
