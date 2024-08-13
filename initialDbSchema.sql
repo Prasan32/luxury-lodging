@@ -31,7 +31,7 @@ CREATE TABLE `listing` (
   `bedsNumber` int DEFAULT NULL,
   `bathroomsNumber` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 CREATE TABLE `listing_image` (
   `id` int NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE `listing_image` (
   PRIMARY KEY (`id`),
   KEY `listingId` (`listingId`),
   CONSTRAINT `listing_image_ibfk_1` FOREIGN KEY (`listingId`) REFERENCES `listing` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 CREATE TABLE `listing_amenity` (
   `id` int NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE `listing_amenity` (
   PRIMARY KEY (`id`),
   KEY `listingId` (`listingId`),
   CONSTRAINT `listing_amenity_ibfk_1` FOREIGN KEY (`listingId`) REFERENCES `listing` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 CREATE TABLE `payment_info` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -78,4 +78,4 @@ CREATE TABLE `payment_info` (
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);

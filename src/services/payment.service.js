@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { config } from "../config/envConfig.js";
 import logger from "../config/winstonLoggerConfig.js";
 import { PaymentInfo } from "../models/index.js";
+import { getCurrentDateTime } from "../helpers/date.js";
 
 const stripe = Stripe(config.STRIPE_SECRET_KEY);
 
@@ -38,10 +39,10 @@ const getStripePublishableKey = () => {
 const getPaymentIntentInfo = async (paymentIntent) => {
     try {
         const paymentIntentData = await stripe.paymentIntents.retrieve(paymentIntent);
-        logger.info("Retrieved payment intent", paymentIntentData);
+        logger.info("[PaymentService][getPaymentIntentInfo] Retrieved payment intent", paymentIntentData);
         return paymentIntentData;
     } catch (error) {
-        logger.error("Error fetching payment intent", error);
+        logger.error("[PaymentService][getPaymentIntentInfo] Error fetching payment intent", error);
         throw error;
     }
 }
@@ -54,29 +55,33 @@ const createCustomer = async (requestObj) => {
         const existingCustomer = response.data.find(c => c.email === email);
         
         if (existingCustomer) {
-            logger.info("Updating customer details");
-            await stripe.customers.update(existingCustomer.id, {
+            logger.info("[PaymentService][createCustomer] Customer already exists with the same email address...");
+            logger.info("[PaymentService][createCustomer] Updating customer details...");
+
+            const customer = await stripe.customers.update(existingCustomer.id, {
                 name: `${firstName} ${lastName}`,
                 email: email,
                 phone: phone
             });
 
+            logger.info("[PaymentService][createCustomer] Customer detail updated", customer);
             return existingCustomer.id;
         }
 
         // create a new customer if not found
-        logger.info("Creating new customer");
+        logger.info("[PaymentService][createCustomer] Creating new customer...");
         const customer = await stripe.customers.create({
             name: `${firstName} ${lastName}`,
             email: email,
             phone: phone
         });
 
-        logger.info("Created customer", customer);
-        logger.info(customer.id);
+        logger.info(`[PaymentService][createCustomer] CustomerID: ${customer.id}`);
+        logger.info("[PaymentService][createCustomer] Customer created", customer);
+
         return customer.id;
     } catch (error) {
-        logger.error("Error creating customer", error);
+        logger.error("[PaymentService][createCustomer] Error creating customer", error);
         throw error;
     }
 }
@@ -121,13 +126,15 @@ const updatePaymentStatus = async (requestObj) => {
     const { paymentStatus, paymentIntentId } = requestObj;
 
     const paymentInfo = await PaymentInfo.update({ paymentStatus }, { where: { paymentIntentId } });
-    logger.info(`Payment status of PaymentIntentId: ${paymentIntentId} updated to ${paymentStatus}`);
+    logger.info(`[PaymentService][updatePaymentStatus] Payment status of PaymentIntentId: ${paymentIntentId} updated to ${paymentStatus} in the db.`);
 
     return paymentInfo;
 };
 
 const handleWebhookResponses = async (req) => {
     try {
+        logger.info(`[PaymentService][handleWebhookResponses] Initiating webhook response handler...`);
+
         const sig = req.headers['stripe-signature'];
         const endpointSecret = config.STRIPE_WEBHOOK_SECRET_KEY;
 
@@ -136,7 +143,7 @@ const handleWebhookResponses = async (req) => {
         try {
             event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
         } catch (err) {
-            logger.error(`Webhook Error: ${err.message}`);
+            logger.error(`[PaymentService][handleWebhookResponses] Error verifying webhook signature: ${err.message}`);
             throw err;
         }
 
@@ -146,7 +153,7 @@ const handleWebhookResponses = async (req) => {
 
         switch (event.type) {
             case 'payment_intent.created':
-                console.log(`PaymentIntent ${paymentIntentId} was created`);
+                logger.info(`[PaymentService][handleWebhookResponses] PaymentIntent ${paymentIntentId} was created`);
                 break;
             case 'payment_intent.requires_action':
             case 'payment_intent.payment_failed':
@@ -156,6 +163,9 @@ const handleWebhookResponses = async (req) => {
             case 'amount_capturable_updated':
             case 'payment_intent.succeeded':
                 {
+                    logger.info(`[PaymentService][handleWebhookResponses] PaymentIntent ${paymentIntentId} got event type ${event.type}`);
+                    logger.info(`[PaymentService][handleWebhookResponses] ${event}`);
+                    logger.info(`[PaymentService][handleWebhookResponses] updating payment status...`)
                     await updatePaymentStatus({
                         paymentStatus: paymentIntent.status,
                         paymentIntentId: paymentIntentId
@@ -163,10 +173,10 @@ const handleWebhookResponses = async (req) => {
                     break;
                 }
             default:
-                console.log(`Unhandled event type ${event.type} for PaymentIntent ${paymentIntentId}`);
+                logger.info(`[PaymentService][handleWebhookResponses] Unhandled event type ${event.type} for PaymentIntent ${paymentIntentId}`);
         }
     } catch (error) {
-        logger.error("Error handling webhook response", error);
+        logger.error("[PaymentService][handleWebhookResponses] Error handling webhook response", error);
         throw error;
     }
 }
