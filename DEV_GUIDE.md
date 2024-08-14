@@ -1,7 +1,13 @@
 ## DATABASE
 ---------------------------------------------------------------------------------------------------------
-1. Copy the CREATE SCHEMAs from the initialDbSchema.sql file present in the root directory 
-2. Run the CREATE SCHEMAs command in the database.
+1. While creating the database use the following command which will ensure that the database and 
+   its tables are fully compatible with the utf8mb4 character set, which supports a wide range of 
+   Unicode characters, including emojis and other special symbols.
+
+   CREATE DATABASE db_name CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+2. Copy the CREATE SCHEMAs from the initialDbSchema.sql file present in the root directory 
+3. Run the CREATE SCHEMAs command in the database.
 ---------------------------------------------------------------------------------------------------------
 
 
