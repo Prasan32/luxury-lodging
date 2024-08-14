@@ -6,3 +6,9 @@ export const processContactSubmission = asyncHandler(async (req, res, next) => {
     await contactServices.processContactSubmission(fullname, email, phoneNumber, description);
     res.status(200).json({ message: "Contact form submitted successfully" });
 });
+
+export const createSubscription = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+    await contactServices.createSubscription(email);
+    res.status(201).json({ message: "Subscription created successfully" });
+});

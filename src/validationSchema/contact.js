@@ -11,3 +11,9 @@ export const processContactSubmissionSchema = Joi.object({
     phoneNumber: Joi.string().required(),
     description: Joi.string().required()
 });
+
+export const createSubscriptionSchema = Joi.object({
+    email: Joi.string().required().email().messages({
+        'string.email': 'Invalid email address format',
+    }),
+});

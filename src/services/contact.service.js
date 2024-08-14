@@ -1,4 +1,6 @@
 import sendEmail from "../utils/sendMail.js";
+import { Subscriber } from "../models/index.js";
+import logger from "../config/winstonLoggerConfig.js";
 
 const processContactSubmission = async (fullname, email, phoneNumber, description) => {
 
@@ -22,8 +24,20 @@ const processContactSubmission = async (fullname, email, phoneNumber, descriptio
     return true;
 };
 
+const createSubscription = async (email) => {
+    const subscriber = await Subscriber.findOne({ where: { email } });
+
+    if (!subscriber) {
+        await Subscriber.create({ email });
+        logger.info(`New subscriber with email ${email}`);
+    }
+
+    return true;
+}
+
 const contactServices = {
-    processContactSubmission
+    processContactSubmission,
+    createSubscription
 };
 
 export default contactServices;
