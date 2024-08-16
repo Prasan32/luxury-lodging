@@ -135,10 +135,6 @@ const getListings = async (page, limit, priceOrder) => {
             {
                 model: ListingImage,
                 as: 'images'
-            },
-            {
-                model: ListingAmenity,
-                as: 'amenities'
             }
         ],
         order,
@@ -215,20 +211,23 @@ const searchListings = async (requestObj) => {
         order
     } = processSearchConditions(location, guests, priceOrder, bedrooms, roomType, minPrice, maxPrice, amenities);
 
+    const includes = [
+        {
+            model: ListingImage,
+            as: 'images'
+        }
+    ];
+    
+    amenities !== "" && includes.push({
+        model: ListingAmenity,
+        as: 'amenities',
+        where: listingAmenitySearchCondition
+    });
+
     const listings = await Listing.findAll(
         {
             where: listingSearchCondition,
-            include: [
-                {
-                    model: ListingImage,
-                    as: 'images'
-                },
-                {
-                    model: ListingAmenity,
-                    as: 'amenities',
-                    where: listingAmenitySearchCondition
-                }
-            ],
+            include: includes,
             order
         },
     );
