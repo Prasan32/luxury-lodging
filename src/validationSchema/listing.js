@@ -68,8 +68,3 @@ export const calculatePriceSchema = Joi.object({
     }).required(),
     guests: Joi.number().required().min(1).max(50).required(),
 });
-
-export const getReviewsSchema = Joi.object({
-    listingId: Joi.number().required(),
-    type: Joi.string().required().valid("guest-to-host", "host-to-guest")
-})

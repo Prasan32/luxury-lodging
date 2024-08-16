@@ -275,12 +275,6 @@ const getCountries = async () => {
     return countryArray;
 }
 
-const getReviews = async (queryObj) => {
-    const { listingId, type } = queryObj;
-    const reviews = await HostAwayClient.getReviews(type);
-    const filteredReviews = reviews.filter(review => review.listingMapId == listingId);
-    return filteredReviews;
-}
 
 const listingService = {
     syncHostAwayListing,
@@ -292,8 +286,7 @@ const listingService = {
     calculatePrice,
     getCalendar,
     getAmenities,
-    getCountries,
-    getReviews
+    getCountries
 };
 
 export default listingService;
