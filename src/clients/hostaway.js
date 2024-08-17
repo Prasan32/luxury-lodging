@@ -134,8 +134,8 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
     }
 }
 
-const getCalendar = async (listingId) => {
-    const url = `${HOSTAWAY_API_URL}/listings/${listingId}/calendar`;
+const getCalendar = async (listingId, startDate) => {
+    const url = `${HOSTAWAY_API_URL}/listings/${listingId}/calendar?startDate=${startDate}`;
     try {
         const accessToken = await getAccessToken();
         if (!accessToken) return null;

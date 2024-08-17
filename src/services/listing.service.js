@@ -257,8 +257,8 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
     return priceDetails;
 }
 
-const getCalendar = async (listingId) => {
-    const calendar = await HostAwayClient.getCalendar(listingId);
+const getCalendar = async (listingId, startDate) => {
+    const calendar = await HostAwayClient.getCalendar(listingId, startDate);
     return calendar;
 }
 

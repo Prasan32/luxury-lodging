@@ -12,7 +12,7 @@ import {
     getCountries
 } from "../controllers/listing.controller.js";
 import { validate, validateQuery } from "../middlewares/validation.js";
-import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema } from "../validationSchema/listing.js";
+import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema, getCalendarSchema } from "../validationSchema/listing.js";
 const router = Router();
 
 router.route('/synclisting').get(syncHostAwayListing);
@@ -29,7 +29,7 @@ router.route('/checkavailability').get(validateQuery(checkAvailabilitySchema), c
 
 router.route('/calculateprice').post(validate(calculatePriceSchema), calculatePrice);
 
-router.route('/getcalendar/:listingId').get(getCalendar);
+router.route('/getcalendar/:listingId').get(validateQuery(getCalendarSchema), getCalendar);
 
 router.route('/amenities').get(getAmenities);
 

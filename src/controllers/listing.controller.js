@@ -47,7 +47,8 @@ export const calculatePrice = asyncHandler(async (req, res, next) => {
 
 export const getCalendar = asyncHandler(async (req, res, next) => {
     const { listingId } = req.params;
-    const calendar = await listingService.getCalendar(listingId);
+    const { startDate } = req.query;
+    const calendar = await listingService.getCalendar(listingId, startDate);
     return res.status(200).json(calendar);
 });
 
