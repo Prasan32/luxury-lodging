@@ -2,8 +2,8 @@ import asyncHandler from "../middlewares/asyncHandler.js";
 import reviewServices from "../services/review.service.js";
 
 export const saveReview = asyncHandler(async (req, res, next) => {
-    const { review } = req.body;
-    await reviewServices.saveReview(review);
+    const { review, listingId } = req.body;
+    await reviewServices.saveReview(review, listingId);
     res.status(201).json({ message: "Review saved successfully!" });
 });
 

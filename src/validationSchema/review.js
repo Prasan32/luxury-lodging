@@ -1,6 +1,7 @@
 import Joi from "joi";
 
 export const saveReviewSchema = Joi.object({
+    listingId: Joi.number().required(),
     review: Joi.string().required()
 });
 

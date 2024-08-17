@@ -8,6 +8,10 @@ const Review = sequelize.define('review', {
         primaryKey: true,
         allowNull: false
     },
+    listingId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     review: {
         type: DataTypes.TEXT,
         allowNull: false,

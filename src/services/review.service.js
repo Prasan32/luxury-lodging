@@ -2,9 +2,9 @@ import logger from "../config/winstonLoggerConfig.js";
 import { Review } from "../models/index.js";
 import HostAwayClient from "../clients/hostaway.js";
 
-const saveReview = async (review) => {
+const saveReview = async (review, listingId) => {
     try {
-        const createdReview = await Review.create({ review });
+        const createdReview = await Review.create({ review, listingId });
         return createdReview;
     } catch (error) {
         logger.error("Failed to save review", error);

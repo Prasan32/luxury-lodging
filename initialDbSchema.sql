@@ -92,6 +92,7 @@ CREATE TABLE `subscriber` (
 
 CREATE TABLE `review` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `listingId` INT NOT NULL,
   `review` TEXT NOT NULL,
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
