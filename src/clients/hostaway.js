@@ -95,9 +95,12 @@ const checkAvailability = async (accessToken, listingId, checkInDate, checkOutDa
         for (const reservation of reservations) {
             const reservationCheckIn = new Date(reservation.arrivalDate);
             const reservationCheckOut = new Date(reservation.departureDate);
-
-            if (isOverlap(checkInDate, checkOutDate, reservationCheckIn, reservationCheckOut)) {
-                return false;
+            
+            const validReservationStatus = ["new", "modified", "ownerStay"];
+            if(validReservationStatus.includes(reservation.status)){
+                if (isOverlap(checkInDate, checkOutDate, reservationCheckIn, reservationCheckOut)) {
+                    return false;
+                }
             }
         }
 
