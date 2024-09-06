@@ -23,16 +23,17 @@ const corsOptions = {
 
 app.use(cors(config.NODE_ENV === "development" ? {} : corsOptions));
 config.NODE_ENV !== "development" && app.use((req, res, next) => {
-    const origin = req.headers.origin;
+    const clientIp = req.headers['x-forwarded-for'];
+    const host = req.headers.host
 
     // Allow requests to the Stripe webhook endpoint regardless of the Origin header
     if (req.path === '/payment/handlewebhookresponses') {
         return next();
     }
 
-    if (!origin) {
-        logger.error(`Request from unknown origin: ${origin}`);
-        logger.error(req?.ip);
+    if (!whitelist.includes(host)) {
+        logger.error(`Request from unknown host: ${host}`);
+        logger.error(`Client IP: ${clientIp}`);
         return res.status(403).json({ message: 'Forbidden' });
     }
 
