@@ -3,6 +3,7 @@ import { config } from "../config/envConfig.js";
 import logger from "../config/winstonLoggerConfig.js";
 import { PaymentInfo } from "../models/index.js";
 import { getCurrentDateTime } from "../helpers/date.js";
+import sendEmail from "../utils/sendMail.js";
 
 const stripe = Stripe(config.STRIPE_SECRET_KEY);
 
@@ -165,11 +166,17 @@ const handleWebhookResponses = async (req) => {
                 {
                     logger.info(`[PaymentService][handleWebhookResponses] PaymentIntent ${paymentIntentId} got event type ${event.type}`);
                     logger.info(`[PaymentService][handleWebhookResponses] ${event}`);
-                    logger.info(`[PaymentService][handleWebhookResponses] updating payment status...`)
+                    logger.info(`[PaymentService][handleWebhookResponses] updating payment status...`);
+        
                     await updatePaymentStatus({
                         paymentStatus: paymentIntent.status,
                         paymentIntentId: paymentIntentId
                     });
+
+                    if (paymentIntent.status =="succeeded"){
+                        await sendSuccessPaymentMail(paymentIntentId);
+                    }
+
                     break;
                 }
             default:
@@ -179,6 +186,138 @@ const handleWebhookResponses = async (req) => {
         logger.error("[PaymentService][handleWebhookResponses] Error handling webhook response", error);
         throw error;
     }
+}
+
+const sendSuccessPaymentMail = async (paymentIntentId) => {
+    const paymentInfo = await PaymentInfo.findOne({ where: { paymentIntentId } });
+    const { guestName, guestEmail,guestPhone, listingId, checkInDate, checkOutDate, guests,
+        customerId, paymentMethod, amount, currency, paymentStatus, createdAt } = paymentInfo;
+
+    const subject = "New Booking Payment from luxurylodgingpm.co";
+    const html = `
+        <html>
+    <head>
+        <style>
+            body {
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+                color: #333333;
+                background-color: #f8f9fa;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                width: 100%;
+                max-width: 600px;
+                background-color: #ffffff;
+                margin: 0 auto;
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+            h2 {
+                color: #007bff;
+                font-size: 26px;
+                margin-bottom: 20px;
+                text-align: center;
+                letter-spacing: 1px;
+            }
+            p {
+                font-size: 16px;
+                line-height: 1.8;
+                margin-bottom: 15px;
+            }
+            .details {
+                background-color: #f1f1f1;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 30px;
+                border-left: 5px solid #007bff;
+                animation: fadeIn 0.5s ease-in;
+            }
+            .details p {
+                margin: 12px 0;
+                font-size: 15px;
+                color: #555555;
+            }
+            .details p strong {
+                color: #333333;
+            }
+            .footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 13px;
+                color: #888888;
+            }
+            .button {
+                display: inline-block;
+                padding: 12px 30px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 50px;
+                font-size: 16px;
+                font-weight: bold;
+                letter-spacing: 0.5px;
+                margin-top: 25px;
+                transition: background-color 0.3s ease;
+            }
+            .button:hover {
+                background-color: #0056b3;
+            }
+            h3 {
+                color: #007bff;
+                font-size: 20px;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #007bff;
+                padding-bottom: 5px;
+            }
+            .fadeIn {
+                animation: fadeIn 0.5s ease-in;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>New Booking Payment Confirmation</h2>
+            <p>We have received a new booking payment through <strong><a href="https://luxurylodgingpm.co/">luxurylodgingpm.co</a></strong>. Please find the details below:</p>
+
+            <div class="details fadeIn">
+                <p><strong>Guest Name:</strong> ${guestName}</p>
+                <p><strong>Email:</strong> ${guestEmail}</p>
+                <p><strong>Phone:</strong> ${guestPhone}</p>
+                <p><strong>Listing ID:</strong> ${listingId}</p>
+                <p><strong>Check-In Date:</strong> ${checkInDate}</p>
+                <p><strong>Check-Out Date:</strong> ${checkOutDate}</p>
+                <p><strong>Number of Guests:</strong> ${guests}</p>
+            </div>
+
+            <h3>Payment Information</h3>
+            <div class="details fadeIn">
+                <p><strong>Payment Intent ID:</strong> ${paymentIntentId}</p>
+                <p><strong>Customer ID:</strong> ${customerId}</p>
+                <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+                <p><strong>Amount:</strong> ${amount} ${currency}</p>
+                <p><strong>Payment Status:</strong> ${paymentStatus}</p>
+                <p><strong>Booking Created At:</strong> ${createdAt}</p>
+            </div>
+
+
+            <div class="footer">
+                <p>This email was automatically generated. Please do not reply.</p>
+                <p><a href="https://luxurylodgingpm.co/">luxurylodgingpm.co</a></p>
+            </div>
+        </div>
+    </body>
+    </html>
+`;
+
+    await sendEmail(subject, html);
+    return true;
 }
 
 const paymentServices = {
