@@ -301,7 +301,7 @@ const sendSuccessPaymentMail = async (paymentIntentId) => {
                 <p><strong>Payment Intent ID:</strong> ${paymentIntentId}</p>
                 <p><strong>Customer ID:</strong> ${customerId}</p>
                 <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-                <p><strong>Amount:</strong> ${amount} ${currency}</p>
+                <p><strong>Amount:</strong> ${parseFloat(amount)/100} ${currency}</p>
                 <p><strong>Payment Status:</strong> ${paymentStatus}</p>
                 <p><strong>Booking Created At:</strong> ${createdAt}</p>
             </div>
