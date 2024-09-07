@@ -218,6 +218,26 @@ const getReviews = async (type) => {
     }
 }
 
+const getTopReviews = async () => {
+    const url = `${HOSTAWAY_API_URL}/reviews?type=guest-to-host&sortOrder=desc`;
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error fetching reviews`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -227,7 +247,8 @@ const HostAwayClient = {
     getCalendar,
     getAmenities,
     getCountries,
-    getReviews
+    getReviews,
+    getTopReviews
 };
 
 export default HostAwayClient;

@@ -11,3 +11,8 @@ export const getReviews = asyncHandler(async (req, res, next) => {
     const reviews = await reviewServices.getReviews(req.query);
     return res.status(200).json(reviews);
 });
+
+export const getTopReviews = asyncHandler(async (req, res, next) => {
+    const topReviews = await reviewServices.getTopReviews();
+    return res.status(200).json(topReviews);
+});

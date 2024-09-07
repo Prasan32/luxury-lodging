@@ -19,9 +19,16 @@ const getReviews = async (queryObj) => {
     return filteredReviews;
 };
 
+const getTopReviews=async()=>{
+   const reviews=await HostAwayClient.getTopReviews();
+   const filteredReviews = reviews.filter(review => review.channelId == 2018 && review.status =="published" && review.rating==10);
+   return filteredReviews;
+};
+
 const reviewServices = {
     saveReview,
-    getReviews
+    getReviews,
+    getTopReviews
 };
 
 export default reviewServices;
