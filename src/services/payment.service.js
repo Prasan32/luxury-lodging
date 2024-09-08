@@ -198,7 +198,7 @@ const handleWebhookResponses = async (req) => {
 
 const sendSuccessPaymentMail = async (paymentInfo) => {
     const { guestName, guestEmail,guestPhone, listingId, checkInDate, checkOutDate, guests,
-        customerId, paymentMethod, amount, currency, paymentStatus, createdAt } = paymentInfo;
+        customerId, paymentMethod, amount, currency, paymentStatus, createdAt, paymentIntentId } = paymentInfo;
 
     const subject = "New Booking Payment from luxurylodgingpm.co";
     const html = `
