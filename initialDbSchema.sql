@@ -75,6 +75,7 @@ CREATE TABLE `payment_info` (
   `amount` float DEFAULT NULL,
   `currency` varchar(255) DEFAULT NULL,
   `paymentStatus` varchar(255) DEFAULT NULL,
+  `reservationId` varchar(255) DEFAULT NULL,
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

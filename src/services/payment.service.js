@@ -133,6 +133,12 @@ const updatePaymentStatus = async (requestObj) => {
     return paymentInfo;
 };
 
+const updateReservationId = async (reservationId, paymentIntentId) => {
+    const paymentInfo = await PaymentInfo.update({ reservationId }, { where: { paymentIntentId } });
+    logger.info(`[PaymentService][updateReservationStatus] Reservation status updated for PaymentIntentId: ${paymentIntentId} in the db.`);
+    return paymentInfo;
+}
+
 const handleWebhookResponses = async (req) => {
     try {
         logger.info(`[PaymentService][handleWebhookResponses] Initiating webhook response handler...`);
@@ -178,11 +184,14 @@ const handleWebhookResponses = async (req) => {
                         const paymentInfo = await PaymentInfo.findOne({ where: { paymentIntentId } });
                         
                         //create hostaway reservation
-                        await HostAwayClient.createHostawayReservation(paymentInfo);
+                        const reservation = await HostAwayClient.createHostawayReservation(paymentInfo);
                         logger.info(`[PaymentService][handleWebhookResponses] Hostaway reservation created for PaymentIntent ${paymentIntentId}`);
+                        logger.info(`[PaymentService][handleWebhookResponses] Reservation object: ${JSON.stringify(reservation)}`);
+
+                        await updateReservationId(reservation.id, paymentIntentId);
 
                         //send success email to the host admin
-                        await sendSuccessPaymentMail(paymentInfo);
+                        await sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
                     }
 
                     break;
@@ -196,7 +205,7 @@ const handleWebhookResponses = async (req) => {
     }
 }
 
-const sendSuccessPaymentMail = async (paymentInfo) => {
+const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDate) => {
     const { guestName, guestEmail,guestPhone, listingId, checkInDate, checkOutDate, guests,
         customerId, paymentMethod, amount, currency, paymentStatus, createdAt, paymentIntentId } = paymentInfo;
 
@@ -301,6 +310,8 @@ const sendSuccessPaymentMail = async (paymentInfo) => {
                 <p><strong>Check-In Date:</strong> ${checkInDate}</p>
                 <p><strong>Check-Out Date:</strong> ${checkOutDate}</p>
                 <p><strong>Number of Guests:</strong> ${guests}</p>
+                <p><strong>Booking Id:</strong> ${reservationId || ''}</p>
+                <p><strong>Booking Date:</strong> ${reservationDate || ''}</p>
             </div>
 
             <h3>Payment Information</h3>
@@ -308,9 +319,9 @@ const sendSuccessPaymentMail = async (paymentInfo) => {
                 <p><strong>Payment Intent ID:</strong> ${paymentIntentId}</p>
                 <p><strong>Customer ID:</strong> ${customerId}</p>
                 <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-                <p><strong>Amount:</strong> ${parseFloat(amount)/100} ${currency}</p>
+                <p><strong>Amount:</strong> ${parseFloat(amount) / 100} ${currency.toUpperCase()}</p>
                 <p><strong>Payment Status:</strong> ${paymentStatus}</p>
-                <p><strong>Booking Created At:</strong> ${createdAt}</p>
+                <p><strong>Payment Date:</strong> ${createdAt}</p>
             </div>
 
 

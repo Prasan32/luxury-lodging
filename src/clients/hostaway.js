@@ -257,7 +257,7 @@ const createHostawayReservation = async (reservationObj) => {
             logger.info(`Reservation created successfully`);
             logger.info(`Reservation object from hostaway: ${JSON.stringify(response.data)}`);
         }
-        return response.data;
+        return response.data?.result;
     } catch (error) {
         logger.error(`Error creating reservation: ${JSON.stringify(requestBody)} `, error);
         return null;
