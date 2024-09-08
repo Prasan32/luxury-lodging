@@ -287,7 +287,7 @@ const createReservationRequestObj = (reservationObj) => {
         totalPrice: parseFloat(amount) / 100,
         isPaid: true,
         paymentMethod,
-        currency
+        currency: currency.toUpperCase(),
     };
     logger.info(`Reservation request object: ${JSON.stringify(reservationRequestObj)}`);
     return reservationRequestObj;
