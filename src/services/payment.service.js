@@ -133,9 +133,9 @@ const updatePaymentStatus = async (requestObj) => {
     return paymentInfo;
 };
 
-const updateReservationId = async (reservationId, paymentIntentId) => {
-    const paymentInfo = await PaymentInfo.update({ reservationId }, { where: { paymentIntentId } });
-    logger.info(`[PaymentService][updateReservationStatus] Reservation status updated for PaymentIntentId: ${paymentIntentId} in the db.`);
+const updateReservationId = async (reservationId, id) => {
+    const paymentInfo = await PaymentInfo.update({ reservationId }, { where: { id: id } });
+    logger.info(`[PaymentService][updateReservationId] ReservationId updated with ${reservationId} in the db. `);
     return paymentInfo;
 }
 
@@ -188,7 +188,7 @@ const handleWebhookResponses = async (req) => {
                         logger.info(`[PaymentService][handleWebhookResponses] Hostaway reservation created for PaymentIntent ${paymentIntentId}`);
                         logger.info(`[PaymentService][handleWebhookResponses] Reservation object: ${JSON.stringify(reservation)}`);
 
-                        await updateReservationId(reservation.id, paymentIntentId);
+                        await updateReservationId(reservation?.id, paymentInfo.id);
 
                         //send success email to the host admin
                         await sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
