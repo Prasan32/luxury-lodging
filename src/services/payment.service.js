@@ -4,6 +4,7 @@ import logger from "../config/winstonLoggerConfig.js";
 import { PaymentInfo } from "../models/index.js";
 import { getCurrentDateTime } from "../helpers/date.js";
 import sendEmail from "../utils/sendMail.js";
+import HostAwayClient from "../clients/hostaway.js";
 
 const stripe = Stripe(config.STRIPE_SECRET_KEY);
 
@@ -174,7 +175,14 @@ const handleWebhookResponses = async (req) => {
                     });
 
                     if (paymentIntent.status =="succeeded"){
-                        await sendSuccessPaymentMail(paymentIntentId);
+                        const paymentInfo = await PaymentInfo.findOne({ where: { paymentIntentId } });
+                        
+                        //create hostaway reservation
+                        await HostAwayClient.createHostawayReservation(paymentInfo);
+                        logger.info(`[PaymentService][handleWebhookResponses] Hostaway reservation created for PaymentIntent ${paymentIntentId}`);
+
+                        //send success email to the host admin
+                        await sendSuccessPaymentMail(paymentInfo);
                     }
 
                     break;
@@ -188,8 +196,7 @@ const handleWebhookResponses = async (req) => {
     }
 }
 
-const sendSuccessPaymentMail = async (paymentIntentId) => {
-    const paymentInfo = await PaymentInfo.findOne({ where: { paymentIntentId } });
+const sendSuccessPaymentMail = async (paymentInfo) => {
     const { guestName, guestEmail,guestPhone, listingId, checkInDate, checkOutDate, guests,
         customerId, paymentMethod, amount, currency, paymentStatus, createdAt } = paymentInfo;
 

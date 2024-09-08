@@ -238,6 +238,61 @@ const getTopReviews = async () => {
     }
 }
 
+const createHostawayReservation = async (reservationObj) => {
+    const requestBody = createReservationRequestObj(reservationObj);
+    const url = `${HOSTAWAY_API_URL}/reservations?forceOverbooking=1`;
+
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.post(url, requestBody, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        if (response.statusCode === 200 || response.statusCode === 201) {
+            logger.info(`Reservation created successfully`);
+            logger.info(`Reservation object from hostaway: ${JSON.stringify(response.data)}`);
+        }
+        return response.data;
+    } catch (error) {
+        logger.error(`Error creating reservation: ${JSON.stringify(requestBody)} `, error);
+        return null;
+    }
+};
+
+const createReservationRequestObj = (reservationObj) => {
+    const {
+        listingId, guestName, guestEmail, guests, checkInDate,
+        checkOutDate, guestPhone, amount, currency, paymentMethod,
+    } = reservationObj;
+
+    const guestFirstName = guestName.split(' ')[0];
+    const guestLastName = guestName.split(' ')[1];
+
+    const reservationRequestObj = {
+        listingMapId: listingId,
+        channelId: 2000,
+        guestName: guestName,
+        guestFirstName,
+        guestLastName,
+        guestEmail,
+        numberOfGuests: guests,
+        arrivalDate: checkInDate,
+        departureDate: checkOutDate,
+        phone: guestPhone,
+        totalPrice: parseFloat(amount) / 100,
+        isPaid: true,
+        paymentMethod,
+        currency
+    };
+    logger.info(`Reservation request object: ${JSON.stringify(reservationRequestObj)}`);
+    return reservationRequestObj;
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -248,7 +303,8 @@ const HostAwayClient = {
     getAmenities,
     getCountries,
     getReviews,
-    getTopReviews
+    getTopReviews,
+    createHostawayReservation
 };
 
 export default HostAwayClient;
