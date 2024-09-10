@@ -125,9 +125,8 @@ const savePaymentInfo = async (requestObj) => {
 }
 
 const updatePaymentStatus = async (requestObj) => {
-    const { paymentStatus, paymentIntentId } = requestObj;
-
-    const paymentInfo = await PaymentInfo.update({ paymentStatus }, { where: { paymentIntentId } });
+    const { paymentStatus, paymentIntentId, chargeId, } = requestObj;
+    const paymentInfo = await PaymentInfo.update({ paymentStatus, chargeId }, { where: { paymentIntentId } });
     logger.info(`[PaymentService][updatePaymentStatus] Payment status of PaymentIntentId: ${paymentIntentId} updated to ${paymentStatus} in the db.`);
 
     return paymentInfo;
@@ -177,7 +176,8 @@ const handleWebhookResponses = async (req) => {
         
                     await updatePaymentStatus({
                         paymentStatus: paymentIntent.status,
-                        paymentIntentId: paymentIntentId
+                        paymentIntentId: paymentIntentId,
+                        chargeId: paymentIntent.latest_charge,
                     });
 
                     if (paymentIntent.status =="succeeded"){
@@ -336,6 +336,10 @@ const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDat
 
     await sendEmail(subject, html);
     return true;
+}
+
+const getChargeInfo = async (paymentIntenId) => {
+
 }
 
 const paymentServices = {

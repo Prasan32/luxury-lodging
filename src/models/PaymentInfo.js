@@ -49,6 +49,9 @@ const PaymentInfo = sequelize.define("PaymentInfo", {
     },
     reservationId: {
         type: DataTypes.STRING,
+    },
+    chargeId:{
+        type: DataTypes.STRING,
     }
 }, {
     tableName: "payment_info",
