@@ -1,6 +1,7 @@
 import axios from "axios";
 import { config } from "../config/envConfig.js";
 import logger from "../config/winstonLoggerConfig.js";
+import { getCurrentDateTime } from "../helpers/date.js";
 
 const HOSTAWAY_API_URL = `https://api.hostaway.com/v1`;
 
@@ -293,6 +294,52 @@ const createReservationRequestObj = (reservationObj) => {
     return reservationRequestObj;
 }
 
+const createOfflineChargeRequestObj = (obj, reservationId) => {
+    const { guestName, listingId, amount, checkInDate, checkOutDate, paymentMethod } = obj;
+    const paymentMethodMap = {
+        card: 'credit_card',
+        us_bank_account: 'bank_transfer',
+        affirm: 'other'
+    };
+    const paymentMethodMapped = paymentMethodMap[paymentMethod] || 'other';
+
+    const requestBody = {
+        title: `Booking Payment from ${guestName}`,
+        description: `Payment for reservation of listing ${listingId}. Payment for securing the booking from ${checkInDate} to ${checkOutDate}.`,
+        amount: parseFloat(amount) / 100,
+        paymentMethod: paymentMethodMapped,
+        status: 'paid',
+        scheduledDate: getCurrentDateTime()
+    };
+    return requestBody;
+};
+
+const createOfflineCharge = async (obj, reservationId) => {
+    const requestBody = createOfflineChargeRequestObj(obj, reservationId);
+
+    const url = `${HOSTAWAY_API_URL}/guestPayments/charges/${reservationId}`;
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.post(url, requestBody, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        if (response.statusCode === 200 || response.statusCode === 201) {
+            logger.info(`Offline charge created successfully`);
+            logger.info(`Offline charge object from hostaway: ${JSON.stringify(response.data.result)}`);
+        }
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error creating offline charge`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -304,7 +351,8 @@ const HostAwayClient = {
     getCountries,
     getReviews,
     getTopReviews,
-    createHostawayReservation
+    createHostawayReservation,
+    createOfflineCharge
 };
 
 export default HostAwayClient;

@@ -171,7 +171,7 @@ const handleWebhookResponses = async (req) => {
             case 'payment_intent.succeeded':
                 {
                     logger.info(`[PaymentService][handleWebhookResponses] PaymentIntent ${paymentIntentId} got event type ${event.type}`);
-                    logger.info(`[PaymentService][handleWebhookResponses] ${event}`);
+                    logger.info(`[PaymentService][handleWebhookResponses] ${JSON.stringify(event)}`);
                     logger.info(`[PaymentService][handleWebhookResponses] updating payment status...`);
         
                     await updatePaymentStatus({
@@ -187,6 +187,9 @@ const handleWebhookResponses = async (req) => {
                         const reservation = await HostAwayClient.createHostawayReservation(paymentInfo);
                         logger.info(`[PaymentService][handleWebhookResponses] Hostaway reservation created for PaymentIntent ${paymentIntentId}`);
                         logger.info(`[PaymentService][handleWebhookResponses] Reservation object: ${JSON.stringify(reservation)}`);
+
+                        const charge = await HostAwayClient.createOfflineCharge(paymentInfo, reservation?.id);
+                        charge && logger.info(`[PaymentService][handleWebhookResponses] Offline charge created for PaymentIntent ${paymentIntentId}`);
 
                         await updateReservationId(reservation?.id, paymentInfo.id);
 
@@ -207,7 +210,7 @@ const handleWebhookResponses = async (req) => {
 
 const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDate) => {
     const { guestName, guestEmail,guestPhone, listingId, checkInDate, checkOutDate, guests,
-        customerId, paymentMethod, amount, currency, paymentStatus, createdAt, paymentIntentId } = paymentInfo;
+        customerId, paymentMethod, amount, currency, paymentStatus, createdAt, paymentIntentId, chargeId } = paymentInfo;
 
     const subject = "New Booking Payment from luxurylodgingpm.co";
     const html = `
@@ -317,6 +320,7 @@ const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDat
             <h3>Payment Information</h3>
             <div class="details fadeIn">
                 <p><strong>Payment Intent ID:</strong> ${paymentIntentId}</p>
+                <p><strong>Payment Charge ID:</strong> ${chargeId || ""}</p>
                 <p><strong>Customer ID:</strong> ${customerId}</p>
                 <p><strong>Payment Method:</strong> ${paymentMethod}</p>
                 <p><strong>Amount:</strong> ${parseFloat(amount) / 100} ${currency.toUpperCase()}</p>
