@@ -180,22 +180,22 @@ const handleWebhookResponses = async (req) => {
                         chargeId: paymentIntent.latest_charge,
                     });
 
-                    if (paymentIntent.status =="succeeded"){
-                        const paymentInfo = await PaymentInfo.findOne({ where: { paymentIntentId } });
+                    // if (paymentIntent.status =="succeeded"){
+                    //     const paymentInfo = await PaymentInfo.findOne({ where: { paymentIntentId } });
                         
-                        //create hostaway reservation
-                        const reservation = await HostAwayClient.createHostawayReservation(paymentInfo);
-                        logger.info(`[PaymentService][handleWebhookResponses] Hostaway reservation created for PaymentIntent ${paymentIntentId}`);
-                        logger.info(`[PaymentService][handleWebhookResponses] Reservation object: ${JSON.stringify(reservation)}`);
+                    //     //create hostaway reservation
+                    //     const reservation = await HostAwayClient.createHostawayReservation(paymentInfo);
+                    //     logger.info(`[PaymentService][handleWebhookResponses] Hostaway reservation created for PaymentIntent ${paymentIntentId}`);
+                    //     logger.info(`[PaymentService][handleWebhookResponses] Reservation object: ${JSON.stringify(reservation)}`);
 
-                        const charge = await HostAwayClient.createOfflineCharge(paymentInfo, reservation?.id);
-                        charge && logger.info(`[PaymentService][handleWebhookResponses] Offline charge created for PaymentIntent ${paymentIntentId}`);
+                    //     const charge = await HostAwayClient.createOfflineCharge(paymentInfo, reservation?.id);
+                    //     charge && logger.info(`[PaymentService][handleWebhookResponses] Offline charge created for PaymentIntent ${paymentIntentId}`);
 
-                        await updateReservationId(reservation?.id, paymentInfo.id);
+                    //     await updateReservationId(reservation?.id, paymentInfo.id);
 
-                        //send success email to the host admin
-                        await sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
-                    }
+                    //     //send success email to the host admin
+                    //     await sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
+                    // }
 
                     break;
                 }
