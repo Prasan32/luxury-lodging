@@ -7,6 +7,7 @@ CREATE TABLE `listing` (
   `address` varchar(255) DEFAULT NULL,
   `price` float DEFAULT NULL,
   `guestsIncluded` int DEFAULT NULL,
+  `personCapacity` int DEFAULT NULL,
   `priceForExtraPerson` float DEFAULT NULL,
   `currencyCode` varchar(255) DEFAULT NULL,
   `internalListingName` varchar(255) DEFAULT NULL,

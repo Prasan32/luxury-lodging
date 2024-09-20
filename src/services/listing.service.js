@@ -63,7 +63,7 @@ const createListingObject = (data) => {
         description: data?.description,
         externalListingName: data?.externalListingName,
         address: data?.address,
-        guests: data?.personCapacity,
+        personCapacity: data?.personCapacity,
         price: data?.price,
         guestsIncluded: data?.guestsIncluded,
         priceForExtraPerson: data?.priceForExtraPerson,
@@ -166,10 +166,10 @@ const getListingInfo = async (listingId) => {
     return listing;
 }
 
-const processSearchConditions = (address, guestsIncluded, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities) => {
+const processSearchConditions = (address, personCapacity, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities) => {
     const listingSearchCondition = {
         ...(address !== "" && { address: { [Op.like]: `%${address}%` } }),
-        ...(guestsIncluded !== "" && { guestsIncluded: { [Op.gte]: guestsIncluded } }),
+        ...(personCapacity !== "" && { personCapacity: { [Op.gte]: personCapacity } }),
         ...(bedroomsNumber !== "" && { bedroomsNumber: { [Op.gte]: bedroomsNumber } }),
         ...(roomType !== "" && { roomType: { [Op.eq]: roomType } }),
         ...(minPrice !== "" && { price: { [Op.between]: [minPrice, maxPrice] } }),

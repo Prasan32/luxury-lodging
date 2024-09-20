@@ -29,6 +29,9 @@ const Listing = sequelize.define("Listing", {
     guestsIncluded: {
         type: DataTypes.INTEGER,
     },
+    personCapacity: {
+        type: DataTypes.INTEGER,
+    },
     priceForExtraPerson: {
         type: DataTypes.FLOAT,
     },
