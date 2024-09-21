@@ -15,20 +15,25 @@ const syncHostAwayListing = async () => {
 
     const existingListings = await Listing.findAll();
 
-    const newListings = listings.filter(
-        (listing) => !existingListings.some((existingListing) => existingListing.id === listing.id)
+    const deletedListings = existingListings.filter(
+        (existingListing) => !listings.some((listing) => listing.id === existingListing.id)
     );
 
-    if (newListings.length === 0) {
-        logger.info("No new listings to sync with the database");
-        return;
+    if (deletedListings.length > 0) {
+        const deletedListingIds = deletedListings.map((listing) => listing.id);
+        await Listing.destroy({ where: { id: deletedListingIds } });
+        logger.info(`Deleted ${deletedListingIds.length} orphaned listings from the database`);
     }
 
-    logger.info(`Syncing ${newListings.length} new listings from Hostaway API`);
+    logger.info(`Syncing ${listings.length} listings from Hostaway API`);
 
-    for (const newListingData of newListings) {
+    for (const newListingData of listings) {
        
         await sequelize.transaction(async (t) => {
+            
+            //delete existingListing
+            await Listing.destroy({ where: { id: newListingData.id }, transaction: t });
+
             const newListingObject = createListingObject(newListingData);
 
             const newListing = await Listing.create(newListingObject, { transaction: t });
