@@ -74,3 +74,15 @@ export const getCalendarSchema = Joi.object({
         'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
     }).required(),
 });
+
+export const getDiscountedPriceSchema = Joi.object({
+    couponCode: Joi.string().required(),
+    listingId: Joi.number().required(),
+    checkInDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
+        'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
+    }).required(),
+    checkOutDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
+        'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
+    }).required(),
+    totalPrice: Joi.number().required()
+});

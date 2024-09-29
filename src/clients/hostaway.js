@@ -340,6 +340,26 @@ const createOfflineCharge = async (obj, reservationId) => {
     }
 }
 
+const getCoupon = async (couponCode) => {
+    const url = `${HOSTAWAY_API_URL}/coupons?limit=500`;
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+        const coupon = response.data?.result.filter(coupon => coupon.name === couponCode);
+        return coupon;
+    } catch (error) {
+        logger.error(`Error fetching coupons`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -352,7 +372,8 @@ const HostAwayClient = {
     getReviews,
     getTopReviews,
     createHostawayReservation,
-    createOfflineCharge
+    createOfflineCharge,
+    getCoupon
 };
 
 export default HostAwayClient;

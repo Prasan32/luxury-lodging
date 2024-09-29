@@ -262,6 +262,84 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
     return priceDetails;
 }
 
+const filterCoupon = async (couponCode, listingId, checkInDate, checkOutDate) => {
+    const coupons = await HostAwayClient.getCoupon(couponCode);
+    if (coupons.length === 0) {
+        throw createHttpError(400, 'Invalid coupon code');
+    }
+
+    const coupon = coupons[0];
+
+    // check if the coupon code is valid for the given listing
+    if (!coupon.listingMapIds.includes(listingId)) {
+        throw createHttpError(400, 'Coupon code is not valid for this listing');
+    }
+
+    // check if the coupon code is expired or inactive
+    if (coupon.isExpired === 1 || coupon.isActive === 0) {
+        throw createHttpError(400, 'Coupon code is expired or inactive');
+    }
+
+    const currentDate = new Date();
+
+    // Check validityDateStart and validityDateEnd
+    if (coupon.validityDateStart && coupon.validityDateEnd) {
+        const validityStart = new Date(coupon.validityDateStart);
+        const validityEnd = new Date(coupon.validityDateEnd);
+        if (currentDate < validityStart || currentDate > validityEnd) {
+            throw createHttpError(400, 'Coupon code is not valid in the current date range');
+        }
+    }
+
+    // Check checkInDateStart and checkInDateEnd for the provided check-in date
+    if (coupon.checkInDateStart && coupon.checkInDateEnd) {
+        const checkInDateStart = new Date(coupon.checkInDateStart);
+        const checkInDateEnd = new Date(coupon.checkInDateEnd);
+        const providedCheckInDate = new Date(checkInDate);
+
+        if (providedCheckInDate < checkInDateStart || providedCheckInDate > checkInDateEnd) {
+            throw createHttpError(400, 'Coupon code is not valid for the given check-in date range');
+        }
+    }
+
+    // Calculate the length of stay
+    const providedCheckInDate = new Date(checkInDate);
+    const providedCheckOutDate = new Date(checkOutDate);
+    const lengthOfStay = (providedCheckOutDate - providedCheckInDate) / (1000 * 60 * 60 * 24); // in days
+
+    // Check the lengthOfStayCondition
+    if (coupon.lengthOfStayCondition === 'equalTo' && lengthOfStay !== coupon.lengthOfStayValue) {
+        throw createHttpError(400, `Coupon code requires a stay length of exactly ${coupon.lengthOfStayValue} days.`);
+    } else if (coupon.lengthOfStayCondition === 'moreThanOrEqualTo' && lengthOfStay < coupon.lengthOfStayValue) {
+        throw createHttpError(400, `Coupon code requires a stay length of at least ${coupon.lengthOfStayValue} days.`);
+    } else if (coupon.lengthOfStayCondition !== 'equalTo' && coupon.lengthOfStayCondition !== 'moreThanOrEqualTo') {
+        logger.warn(`Unknown lengthOfStayCondition: ${coupon.lengthOfStayCondition}`);
+    }
+
+    return coupon;
+};
+
+const calculateDiscountedPrice = async (couponCode, listingId, checkInDate, checkOutDate, totalPrice) => {
+    const coupon = await filterCoupon(couponCode, listingId, checkInDate, checkOutDate);
+
+    let amountAfterDiscount;
+
+    if (coupon.type === 'flatFee') {
+        amountAfterDiscount = totalPrice - coupon.amount;
+    } else if (coupon.type === 'percentage') {
+        amountAfterDiscount = totalPrice - (totalPrice * (coupon.amount / 100));
+    } else {
+        throw createHttpError(400, 'Invalid coupon type');
+    }
+
+    // Ensure the discounted price doesn't go below zero
+    if (amountAfterDiscount < 0) {
+        amountAfterDiscount = 0;
+    }
+
+    return amountAfterDiscount;
+};
+
 const getCalendar = async (listingId, startDate) => {
     const calendar = await HostAwayClient.getCalendar(listingId, startDate);
     return calendar;
@@ -291,7 +369,8 @@ const listingService = {
     calculatePrice,
     getCalendar,
     getAmenities,
-    getCountries
+    getCountries,
+    calculateDiscountedPrice
 };
 
 export default listingService;
