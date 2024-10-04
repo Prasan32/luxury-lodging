@@ -62,8 +62,8 @@ export const getCountries = asyncHandler(async (req, res, next) => {
     return res.status(200).json(countries);
 });
 
-export const getDiscountedPrice = asyncHandler(async (req, res, next) => {
+export const getDiscountPrice = asyncHandler(async (req, res, next) => {
     const { couponCode, listingId, checkInDate, checkOutDate, totalPrice } = req.query;
-    const discountedPrice = await listingService.calculateDiscountedPrice(couponCode, listingId, checkInDate, checkOutDate, totalPrice);
+    const discountedPrice = await listingService.getDiscountPrice(couponCode, listingId, checkInDate, checkOutDate, totalPrice);
     return res.status(200).json({ discountedPrice });
 });

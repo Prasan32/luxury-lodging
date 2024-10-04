@@ -75,7 +75,7 @@ export const getCalendarSchema = Joi.object({
     }).required(),
 });
 
-export const getDiscountedPriceSchema = Joi.object({
+export const getDiscountPriceSchema = Joi.object({
     couponCode: Joi.string().required(),
     listingId: Joi.number().required(),
     checkInDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({

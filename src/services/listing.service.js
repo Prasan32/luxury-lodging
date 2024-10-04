@@ -319,25 +319,25 @@ const filterCoupon = async (couponCode, listingId, checkInDate, checkOutDate) =>
     return coupon;
 };
 
-const calculateDiscountedPrice = async (couponCode, listingId, checkInDate, checkOutDate, totalPrice) => {
+const getDiscountPrice = async (couponCode, listingId, checkInDate, checkOutDate, totalPrice) => {
     const coupon = await filterCoupon(couponCode, listingId, checkInDate, checkOutDate);
 
-    let amountAfterDiscount;
+    let discountAmount;
 
     if (coupon.type === 'flatFee') {
-        amountAfterDiscount = totalPrice - coupon.amount;
+        discountAmount = coupon.amount;
     } else if (coupon.type === 'percentage') {
-        amountAfterDiscount = totalPrice - (totalPrice * (coupon.amount / 100));
+        discountAmount = (totalPrice * (coupon.amount / 100));
     } else {
         throw createHttpError(400, 'Invalid coupon type');
     }
 
     // Ensure the discounted price doesn't go below zero
-    if (amountAfterDiscount < 0) {
-        amountAfterDiscount = 0;
+    if (discountAmount < 0) {
+        discountAmount = 0;
     }
 
-    return amountAfterDiscount;
+    return discountAmount;
 };
 
 const getCalendar = async (listingId, startDate) => {
@@ -370,7 +370,7 @@ const listingService = {
     getCalendar,
     getAmenities,
     getCountries,
-    calculateDiscountedPrice
+    getDiscountPrice
 };
 
 export default listingService;

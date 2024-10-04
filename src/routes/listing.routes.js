@@ -10,10 +10,10 @@ import {
     syncHostAwayListing,
     getAmenities,
     getCountries,
-    getDiscountedPrice
+    getDiscountPrice
 } from "../controllers/listing.controller.js";
 import { validate, validateQuery } from "../middlewares/validation.js";
-import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema, getCalendarSchema, getDiscountedPriceSchema } from "../validationSchema/listing.js";
+import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema, getCalendarSchema, getDiscountPriceSchema } from "../validationSchema/listing.js";
 const router = Router();
 
 router.route('/synclisting').get(syncHostAwayListing);
@@ -36,6 +36,6 @@ router.route('/amenities').get(getAmenities);
 
 router.route('/getcountries').get(getCountries);
 
-router.route('/getdiscountedprice').get(validateQuery(getDiscountedPriceSchema), getDiscountedPrice);
+router.route('/getdiscountprice').get(validateQuery(getDiscountPriceSchema), getDiscountPrice);
 
 export default router;
