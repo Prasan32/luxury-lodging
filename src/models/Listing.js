@@ -99,6 +99,10 @@ const Listing = sequelize.define("Listing", {
     bathroomsNumber: {
         type: DataTypes.INTEGER,
         allowNull: true
+    },
+    houseRules: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: "listing",

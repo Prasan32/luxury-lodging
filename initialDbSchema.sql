@@ -31,6 +31,7 @@ CREATE TABLE `listing` (
   `bedroomsNumber` int DEFAULT NULL,
   `bedsNumber` int DEFAULT NULL,
   `bathroomsNumber` int DEFAULT NULL,
+  `houseRules` TEXT DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 

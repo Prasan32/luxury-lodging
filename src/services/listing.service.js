@@ -93,6 +93,7 @@ const createListingObject = (data) => {
         bedroomsNumber: data?.bedroomsNumber,
         bedsNumber: data?.bedsNumber,
         bathroomsNumber: data?.bathroomsNumber,
+        houseRules: data?.houseRules
     };
 };
 
