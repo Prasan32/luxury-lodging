@@ -359,6 +359,30 @@ const getCountries = async () => {
     return countryArray;
 }
 
+const getLocationList = async () => {
+    const list = await Listing.findAll({
+        attributes: ['country', 'state', 'city']
+    });
+
+    const result = list.reduce((acc, { country, state, city }) => {
+        const stateIndex = acc.findIndex(item => item.state === state);
+
+        if (stateIndex === -1) {
+            // If state is not already present, add it
+            acc.push({ country, state, cities: [{ city }] });
+        } else {
+            // If state is present, add the city if not already present
+            const cityExists = acc[stateIndex].cities.some(item => item.city === city);
+            if (!cityExists) {
+                acc[stateIndex].cities.push({ city });
+            }
+        }
+        return acc;
+    }, []);
+    
+    return result;
+}
+
 
 const listingService = {
     syncHostAwayListing,
@@ -371,7 +395,8 @@ const listingService = {
     getCalendar,
     getAmenities,
     getCountries,
-    getDiscountPrice
+    getDiscountPrice,
+    getLocationList
 };
 
 export default listingService;

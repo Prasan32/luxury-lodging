@@ -67,3 +67,8 @@ export const getDiscountPrice = asyncHandler(async (req, res, next) => {
     const discountedPrice = await listingService.getDiscountPrice(couponCode, listingId, checkInDate, checkOutDate, totalPrice);
     return res.status(200).json({ discountedPrice });
 });
+
+export const getLocationList = asyncHandler(async (req, res, next) => {
+    const locationList = await listingService.getLocationList();
+    return res.status(200).json(locationList);
+});
