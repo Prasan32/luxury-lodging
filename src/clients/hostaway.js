@@ -112,13 +112,14 @@ const checkAvailability = async (accessToken, listingId, checkInDate, checkOutDa
     }
 };
 
-const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
+const calculatePrice = async (listingId, checkIn, checkOut, guests, reservationCouponId) => {
     const url = `${HOSTAWAY_API_URL}/listings/${listingId}/calendar/priceDetails`;
     const requestBody = {
         startingDate: new Date(checkIn),
         endingDate: new Date(checkOut),
         numberOfGuests: guests,
-        verion: 2
+        verion: 2,
+        reservationCouponId: reservationCouponId
     };
     try {
         const accessToken = await getAccessToken();
@@ -360,6 +361,33 @@ const getCoupon = async (couponCode) => {
     }
 }
 
+const createReservationCouponObject = async (requestBody) => {
+    const url = `${HOSTAWAY_API_URL}/reservationCoupons`;
+    const body = {
+        couponName: requestBody.couponName,
+        listingMapId: requestBody.listingId,
+        startingDate: requestBody.checkIn,
+        endingDate: requestBody.checkOut,
+    };
+
+    try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) return null;
+
+        const response = await axios.post(url, body, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error creating reservation coupon object`, error);
+        return null;
+    }
+}
+
 const HostAwayClient = {
     getAccessToken,
     getListings,
@@ -373,7 +401,8 @@ const HostAwayClient = {
     getTopReviews,
     createHostawayReservation,
     createOfflineCharge,
-    getCoupon
+    getCoupon,
+    createReservationCouponObject,
 };
 
 export default HostAwayClient;

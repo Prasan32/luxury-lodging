@@ -258,8 +258,22 @@ const checkAvailability = async (listingId, checkIn, checkOut) => {
     return isAvailable;
 }
 
-const calculatePrice = async (listingId, checkIn, checkOut, guests) => {
-    const priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests);
+const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName) => {
+    if (couponName !== null) {
+        return calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
+    }
+    const priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
+    return priceDetails;
+};
+
+const calculatePriceWithCouponCode = async (couponName, listingId, checkIn, checkOut, guests) => {
+    const reservationCoupon = await HostAwayClient.createReservationCouponObject({ couponName, listingId, checkIn, checkOut });
+    if (!reservationCoupon) {
+        throw createHttpError(400, 'Invalid Coupon');
+    }
+
+    const reservationCouponId = reservationCoupon.reservationCouponId;
+    const priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, reservationCouponId);
     return priceDetails;
 }
 

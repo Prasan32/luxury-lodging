@@ -67,6 +67,7 @@ export const calculatePriceSchema = Joi.object({
         'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
     }).required(),
     guests: Joi.number().required().min(1).max(50).required(),
+    couponName: Joi.string().required().allow(null)
 });
 
 export const getCalendarSchema = Joi.object({
