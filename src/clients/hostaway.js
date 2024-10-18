@@ -270,6 +270,7 @@ const createReservationRequestObj = (reservationObj) => {
     const {
         listingId, guestName, guestEmail, guests, checkInDate,
         checkOutDate, guestPhone, amount, currency, paymentMethod,
+        couponName
     } = reservationObj;
 
     const guestFirstName = guestName.split(' ')[0];
@@ -290,6 +291,7 @@ const createReservationRequestObj = (reservationObj) => {
         isPaid: true,
         paymentMethod,
         currency: currency.toUpperCase(),
+        ...(couponName !== null && { couponName: couponName })
     };
     logger.info(`Reservation request object: ${JSON.stringify(reservationRequestObj)}`);
     return reservationRequestObj;

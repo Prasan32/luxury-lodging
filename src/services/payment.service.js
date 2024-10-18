@@ -102,7 +102,8 @@ const savePaymentInfo = async (requestObj) => {
         paymentMethod,
         amount,
         currency,
-        paymentStatus
+        paymentStatus,
+        couponName
     } = requestObj;
 
     const paymentInfo = await PaymentInfo.create({
@@ -118,7 +119,8 @@ const savePaymentInfo = async (requestObj) => {
         paymentMethod,
         amount,
         currency,
-        paymentStatus
+        paymentStatus,
+        couponName
     });
 
     return paymentInfo;

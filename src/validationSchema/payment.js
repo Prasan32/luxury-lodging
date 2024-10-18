@@ -49,4 +49,5 @@ export const savePaymentInfoSchema = Joi.object({
     amount: Joi.number().required(),
     currency: Joi.string().required(),
     paymentStatus: Joi.string().required(),
+    couponName: Joi.string().required().allow(null),
 });
