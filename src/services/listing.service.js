@@ -375,20 +375,20 @@ const getCountries = async () => {
 
 const getLocationList = async () => {
     const list = await Listing.findAll({
-        attributes: ['country', 'state', 'city']
+        attributes: ['country', 'state', 'city', 'lat', 'lng']
     });
 
-    const result = list.reduce((acc, { country, state, city }) => {
+    const result = list.reduce((acc, { country, state, city, lat, lng }) => {
         const stateIndex = acc.findIndex(item => item.state === state);
 
         if (stateIndex === -1) {
             // If state is not already present, add it
-            acc.push({ country, state, cities: [{ city }] });
+            acc.push({ country, state, cities: [{ city, lat, lng }] });
         } else {
             // If state is present, add the city if not already present
             const cityExists = acc[stateIndex].cities.some(item => item.city === city);
             if (!cityExists) {
-                acc[stateIndex].cities.push({ city });
+                acc[stateIndex].cities.push({ city, lat, lng });
             }
         }
         return acc;
