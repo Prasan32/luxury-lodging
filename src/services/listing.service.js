@@ -140,12 +140,19 @@ const getListings = async (page, limit, priceOrder) => {
         include: [
             {
                 model: ListingImage,
-                as: 'images'
+                as: 'images',
+                // order: [['sortOrder', 'DESC']]
             }
         ],
         order,
         ...searchObj
     });
+
+    // Sort images by sortOrder within each listing
+    listings.forEach(listing => {
+        listing.images.sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+
     return listings;
 }
 
@@ -169,6 +176,10 @@ const getListingInfo = async (listingId) => {
             }
         ]
     });
+
+    // Sort images by sortOrder
+    listing.images.sort((a, b) => a.sortOrder - b.sortOrder);
+
     return listing;
 }
 
