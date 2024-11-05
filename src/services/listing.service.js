@@ -185,7 +185,7 @@ const getListingInfo = async (listingId) => {
 
 const processSearchConditions = (address, personCapacity, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities) => {
     const listingSearchCondition = {
-        ...(address !== "" && { address: { [Op.like]: `%${address}%` } }),
+        ...(address !== "" && { city: { [Op.like]: `%${address}%` } }),
         ...(personCapacity !== "" && { personCapacity: { [Op.gte]: personCapacity } }),
         ...(bedroomsNumber !== "" && { bedroomsNumber: { [Op.gte]: bedroomsNumber } }),
         ...(roomType !== "" && { roomType: { [Op.eq]: roomType } }),
@@ -248,6 +248,11 @@ const searchListings = async (requestObj) => {
             order
         },
     );
+
+    // Sort images by sortOrder within each listing
+    listings.forEach(listing => {
+        listing.images.sort((a, b) => a.sortOrder - b.sortOrder);
+    });
 
     if (checkIn != "" && checkOut != "") {
         const accessToken = await HostAwayClient.getAccessToken();
