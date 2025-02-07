@@ -34,6 +34,33 @@ const createPaymentIntent = async (requestObj) => {
     }
 };
 
+const updatePaymentIntent = async (requestObj) => {
+    const { paymentIntentId, listingId, checkIn, checkOut, guests, amount, currency } = requestObj;
+    try {
+        const paymentIntent = await stripe.paymentIntents.update(
+            paymentIntentId,
+            {
+                amount: amount,
+                currency: currency,
+                metadata: {
+                    listingId,
+                    checkIn,
+                    checkOut,
+                    guests
+                },
+            }
+        );
+
+        logger.info("Updated payment intent", paymentIntent);
+        logger.info(paymentIntent.id);
+
+        return { clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id };
+    } catch (error) {
+        logger.error("Error updating payment intent", error);
+        throw error;
+    }
+};
+
 const getStripePublishableKey = () => {
     return config.STRIPE_PUBLISHABLE_KEY;
 }
@@ -350,6 +377,7 @@ const getChargeInfo = async (paymentIntenId) => {
 
 const paymentServices = {
     createPaymentIntent,
+    updatePaymentIntent,
     createCustomer,
     savePaymentInfo,
     getPaymentIntentInfo,

@@ -6,6 +6,11 @@ export const createPaymentIntent = asyncHandler(async (req, res, next) => {
     return res.status(201).json({ clientSecret, paymentIntentId });
 });
 
+export const updatePaymentIntent = asyncHandler(async (req, res, next) => {
+    const { clientSecret, paymentIntentId } = await paymentServices.updatePaymentIntent(req.body);
+    return res.status(201).json({ clientSecret, paymentIntentId });
+});
+
 export const getPaymentIntentInfo = asyncHandler(async (req, res, next) => {
     const paymentIntent = await paymentServices.getPaymentIntentInfo(req.params.paymentIntentId);
     return res.status(200).json({ paymentIntent });

@@ -1,10 +1,12 @@
 import express from "express";
-import { createCustomer, createPaymentIntent, savePaymentInfo, getPaymentIntentInfo, getStripePublishableKey } from "../controllers/payment.controller.js";
+import { createCustomer, createPaymentIntent, savePaymentInfo, getPaymentIntentInfo, getStripePublishableKey, updatePaymentIntent } from "../controllers/payment.controller.js";
 import { validate } from "../middlewares/validation.js";
-import { createCustomerSchema, createPaymentIntentSchema, savePaymentInfoSchema } from "../validationSchema/payment.js";
+import { createCustomerSchema, createPaymentIntentSchema, savePaymentInfoSchema, updatePaymentIntentSchema } from "../validationSchema/payment.js";
 const router = express.Router();
 
 router.route('/createpaymentintent').post(validate(createPaymentIntentSchema), createPaymentIntent);
+
+router.route('/updatepaymentintent').put(validate(updatePaymentIntentSchema), updatePaymentIntent);
 
 router.route('/getpaymentintent/:paymentIntentId').get(getPaymentIntentInfo);
 
