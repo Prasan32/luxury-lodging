@@ -15,7 +15,7 @@ const createPaymentIntent = async (requestObj) => {
             amount: amount,
             currency: currency,
             payment_method_types: ['card', 'us_bank_account', 'affirm'],
-            description: `Payment Intent for booking listing:${listingId} [${checkIn}-${checkOut}][${guests}]`,
+            description: `Payment Intent for booking listing:${listingId} [${checkIn}-${checkOut}][guestCount:${guests}]`,
             metadata: {
                 listingId,
                 checkIn,
@@ -42,6 +42,7 @@ const updatePaymentIntent = async (requestObj) => {
             {
                 amount: amount,
                 currency: currency,
+                description: `Payment Intent for booking listing:${listingId} [${checkIn}-${checkOut}][guestCount:${guests}]`,
                 metadata: {
                     listingId,
                     checkIn,
