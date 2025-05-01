@@ -185,7 +185,11 @@ const getListingInfo = async (listingId) => {
 
 const processSearchConditions = (address, personCapacity, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities) => {
     const listingSearchCondition = {
-        ...(address !== "" && { city: { [Op.like]: `%${address}%` } }),
+        ...(Array.isArray(address) && address.length > 0 && {
+            [Op.or]: address.map(city => ({
+                city: { [Op.like]: `%${city}%` }
+            }))
+        }),
         ...(personCapacity !== "" && { personCapacity: { [Op.gte]: personCapacity } }),
         ...(bedroomsNumber !== "" && { bedroomsNumber: { [Op.gte]: bedroomsNumber } }),
         ...(roomType !== "" && { roomType: { [Op.eq]: roomType } }),
