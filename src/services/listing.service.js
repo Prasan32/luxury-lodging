@@ -413,9 +413,18 @@ const getLocationList = async () => {
         }
         return acc;
     }, []);
-    
+
+    // Sort states alphabetically
+    result.sort((a, b) => a.state.localeCompare(b.state));
+
+    // Sort cities in each state alphabetically
+    result.forEach(stateItem => {
+        stateItem.cities.sort((a, b) => a.city.localeCompare(b.city));
+    });
+
     return result;
-}
+};
+
 
 
 const listingService = {
