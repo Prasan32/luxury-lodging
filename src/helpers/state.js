@@ -1,0 +1,18 @@
+export const stateMap = {
+    CA: "California",
+    FL: "Florida",
+    IL: "Illinois",
+    GA: "Georgia",
+    PA: "Pennsylvania",
+    MO: "Missouri",
+    AL: "Alabama",
+    AZ: "Arizona",
+    NC: "North Carolina",
+    OH: "Ohio",
+    MI: "Michigan",
+    KS: "Kansas",
+    WI: "Wisconsin",
+    VA: "Virginia",
+    TX: "Texas",
+    VT: "Vermont",
+};

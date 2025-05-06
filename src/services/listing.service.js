@@ -4,6 +4,7 @@ import { Listing, ListingImage, ListingAmenity } from "../models/index.js";
 import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
 import { Op } from "sequelize";
+import { stateMap } from "../helpers/state.js";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -473,11 +474,12 @@ const getLocationList = async () => {
     });
 
     const result = list.reduce((acc, { country, state, city, lat, lng }) => {
-        const stateIndex = acc.findIndex(item => item.state === state);
+        const fullStateName = stateMap[state] || state; // fallback to original if not mapped
+        const stateIndex = acc.findIndex(item => item.state === fullStateName);
 
         if (stateIndex === -1) {
             // If state is not already present, add it
-            acc.push({ country, state, cities: [{ city, lat, lng }] });
+            acc.push({ country, state: fullStateName, cities: [{ city, lat, lng }] });
         } else {
             // If state is present, add the city if not already present
             const cityExists = acc[stateIndex].cities.some(item => item.city === city);
@@ -498,7 +500,6 @@ const getLocationList = async () => {
 
     return result;
 };
-
 
 
 const listingService = {
