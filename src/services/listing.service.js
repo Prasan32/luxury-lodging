@@ -377,8 +377,55 @@ const getDiscountPrice = async (couponCode, listingId, checkInDate, checkOutDate
 
 const getCalendar = async (listingId, startDate) => {
     const calendar = await HostAwayClient.getCalendar(listingId, startDate);
-    return calendar;
+    const { unAvailableDateForBooking, availableCheckOutDate, availableDate } = processAvailability(calendar);
+    return {
+        unAvailableDateForBooking,
+        availableDate,
+        availableCheckOutDate
+    };
+};
+
+function processAvailability(data) {
+    const availableDateSet =[];
+    const unAvailableDateForBooking = [];
+    const availableCheckoutDate = [];
+
+    // Step 1: Collect all departure dates from reservations
+    const departureDatesSet = [];
+    data.forEach(entry => {
+        if (Array.isArray(entry.reservations)) {
+            entry.reservations.forEach(res => {
+                if (res?.arrivalDate) {
+                    departureDatesSet.push(res.arrivalDate);
+                }
+            });
+        }
+    });
+
+    // Step 2: Process each date
+    data.forEach(entry => {
+        const { date, isAvailable } = entry;
+
+        if (isAvailable == 1) {
+            availableDateSet.push(date);
+        } else {
+            if (departureDatesSet.includes(date)) {
+                availableCheckoutDate.push(date);
+                // availableDateSet.add(date); // include checkout dates in availableDate
+            } else {
+                unAvailableDateForBooking.push(date);
+            }
+        }
+    });
+
+    return {
+        availableDate: availableDateSet,
+        unAvailableDateForBooking,
+        availableCheckOutDate: availableCheckoutDate
+    };
 }
+
+
 
 const getAmenities = async () => {
     const amenities = await HostAwayClient.getAmenities();
