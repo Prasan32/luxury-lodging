@@ -5,6 +5,8 @@ import { PaymentInfo } from "../models/index.js";
 import { getCurrentDateTime } from "../helpers/date.js";
 import sendEmail from "../utils/sendMail.js";
 import HostAwayClient from "../clients/hostaway.js";
+import crypto from "crypto";
+import createHttpError from "http-errors";
 
 const stripe = Stripe(config.STRIPE_SECRET_KEY);
 
@@ -372,8 +374,52 @@ const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDat
     return true;
 }
 
-const getChargeInfo = async (paymentIntenId) => {
+const generateHash = async (userAccountId, orderId, amount, currency, chargebackProtection, apiKey) => {
+    const path = `${userAccountId}.${orderId}.${parseFloat(amount)}.${currency}.${chargebackProtection}`;
+    const hash = crypto.createHmac('sha256', apiKey).update(path).digest('hex');
+    logger.info(`[generateHash] Hash created for orderId ${orderId}`);
+    return hash;
+};
 
+const createOrderWithHash = async (requestObj) => {
+    const {
+        guestName,
+        guestEmail,
+        guestPhone,
+        listingId,
+        checkInDate,
+        checkOutDate,
+        guests,
+        amount,
+        currency,
+        couponName,
+    } = requestObj;
+
+    const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const paymentStatus = "pending";
+
+    const paymentInfo = await PaymentInfo.create({
+        guestName,
+        guestEmail,
+        guestPhone,
+        listingId,
+        checkInDate,
+        checkOutDate,
+        guests,
+        amount,
+        currency,
+        paymentStatus,
+        couponName,
+        orderId
+    });
+    logger.info(`[createOrderWithHash] New order created for guest ${guestName} with orderId ${orderId}`);
+
+    const apiKey = process.env.CHARGE_AUTOMATION_API_KEY;
+    const userAccountId = process.env.CHARGE_AUTOMATION_ACCOUNT_ID;
+    const chargebackProtection = "Yes";
+    const hash = await generateHash(userAccountId, orderId, amount, currency, chargebackProtection, apiKey)
+
+    return { orderId, hash, userAccountId };
 }
 
 const paymentServices = {
@@ -383,7 +429,9 @@ const paymentServices = {
     savePaymentInfo,
     getPaymentIntentInfo,
     handleWebhookResponses,
-    getStripePublishableKey
+    getStripePublishableKey,
+    generateHash,
+    createOrderWithHash
 };
 
 export default paymentServices;
