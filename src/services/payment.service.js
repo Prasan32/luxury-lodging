@@ -120,39 +120,13 @@ const createCustomer = async (requestObj) => {
 
 const savePaymentInfo = async (requestObj) => {
     const {
-        guestName,
-        guestEmail,
-        guestPhone,
-        listingId,
-        checkInDate,
-        checkOutDate,
-        guests,
-        paymentIntentId,
-        customerId,
-        paymentMethod,
-        amount,
-        currency,
+        orderId,
         paymentStatus,
-        couponName
+        chargeId
     } = requestObj;
 
-    const paymentInfo = await PaymentInfo.create({
-        guestName,
-        guestEmail,
-        guestPhone,
-        listingId,
-        checkInDate,
-        checkOutDate,
-        guests,
-        paymentIntentId,
-        customerId,
-        paymentMethod,
-        amount,
-        currency,
-        paymentStatus,
-        couponName
-    });
-
+    const paymentInfo = await PaymentInfo.update({ paymentStatus, chargeId }, { where: { orderId } });
+    logger.info(`[savePaymentInfo] OrderId ${orderId} updated with paymentStatus ${paymentStatus} and chargeId ${chargeId}`);
     return paymentInfo;
 }
 
@@ -416,10 +390,11 @@ const createOrderWithHash = async (requestObj) => {
 
     const apiKey = process.env.CHARGE_AUTOMATION_API_KEY;
     const userAccountId = process.env.CHARGE_AUTOMATION_ACCOUNT_ID;
+    const url = process.env.CHARGE_AUTOMATION_CHECKOUT_IFRAME
     const chargebackProtection = "Yes";
     const hash = await generateHash(userAccountId, orderId, amount, currency, chargebackProtection, apiKey)
 
-    return { orderId, hash, userAccountId };
+    return { orderId, hash, userAccountId, url };
 }
 
 const paymentServices = {

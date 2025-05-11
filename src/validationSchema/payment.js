@@ -49,24 +49,9 @@ export const createCustomerSchema = Joi.object({
 });
 
 export const savePaymentInfoSchema = Joi.object({
-    guestName: Joi.string().required(),
-    guestEmail: Joi.string().required(),
-    guestPhone: Joi.string().required(),
-    listingId: Joi.number().required(),
-    checkInDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
-        'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
-    }).required(),
-    checkOutDate: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/).messages({
-        'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
-    }).required(),
-    guests: Joi.number().required(),
-    paymentIntentId: Joi.string().required(),
-    customerId: Joi.string().required(),
-    paymentMethod: Joi.string().required(),
-    amount: Joi.number().required(),
-    currency: Joi.string().required(),
+    orderId: Joi.string().required(),
     paymentStatus: Joi.string().required(),
-    couponName: Joi.string().required().allow(null),
+    chargeId: Joi.string().required().allow(null),
 });
 
 
