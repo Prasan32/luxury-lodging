@@ -35,3 +35,8 @@ export const getStripePublishableKey = asyncHandler(async (req, res, next) => {
     const publishableKey = paymentServices.getStripePublishableKey();
     return res.status(200).json({ publishableKey });
 });
+
+export const createOrderWithHash = asyncHandler(async (req, res, next) => {
+    const { orderId, hash, userAccountId, url } = await paymentServices.createOrderWithHash(req.body);
+    return res.status(201).json({ orderId, hash, userAccountId, url });
+});

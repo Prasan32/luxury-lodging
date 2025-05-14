@@ -5,6 +5,8 @@ import { PaymentInfo } from "../models/index.js";
 import { getCurrentDateTime } from "../helpers/date.js";
 import sendEmail from "../utils/sendMail.js";
 import HostAwayClient from "../clients/hostaway.js";
+import crypto from "crypto";
+import createHttpError from "http-errors";
 
 const stripe = Stripe(config.STRIPE_SECRET_KEY);
 
@@ -117,41 +119,51 @@ const createCustomer = async (requestObj) => {
 }
 
 const savePaymentInfo = async (requestObj) => {
-    const {
-        guestName,
-        guestEmail,
-        guestPhone,
-        listingId,
-        checkInDate,
-        checkOutDate,
-        guests,
-        paymentIntentId,
-        customerId,
-        paymentMethod,
-        amount,
-        currency,
-        paymentStatus,
-        couponName
-    } = requestObj;
+    const { orderId, paymentStatus, chargeId } = requestObj;
+    const paymentMethod = "credit_card";
 
-    const paymentInfo = await PaymentInfo.create({
-        guestName,
-        guestEmail,
-        guestPhone,
-        listingId,
-        checkInDate,
-        checkOutDate,
-        guests,
-        paymentIntentId,
-        customerId,
-        paymentMethod,
-        amount,
-        currency,
-        paymentStatus,
-        couponName
-    });
+    const [updatedCount] = await PaymentInfo.update({ paymentStatus, chargeId, paymentMethod }, { where: { orderId } });
+    if (updatedCount === 0) {
+        logger.error(`[savePaymentInfo] No record found to update for orderId ${orderId}`);
+    }
+    logger.info(`[savePaymentInfo] OrderId ${orderId} updated with paymentStatus ${paymentStatus} and chargeId ${chargeId}`);
 
-    return paymentInfo;
+    if (chargeId && paymentStatus === "paymentSuccess") {
+        // create reservation and offline charge in Hostaway
+        const paymentInfo = await PaymentInfo.findOne({ where: { chargeId } });
+        if (!paymentInfo) {
+            logger.error(`[savePaymentInfo] No payment record found for chargeId ${chargeId} (orderId: ${orderId})`);
+            throw createHttpError(500, 'Payment info not found');
+        }
+        // const reservation = await createHAReservation(paymentInfo, chargeId);
+        // await updateReservationId(reservation?.id, paymentInfo.id);
+        // await createHAOfflineCharge(paymentInfo, reservation?.id, chargeId);
+
+        // //send success email to the host admin
+        // sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
+        return paymentInfo;
+    }
+    return updatedCount;
+};
+
+const createHAReservation = async (paymentInfo, chargeId) => {
+    //create hostaway reservation
+    const reservation = await HostAwayClient.createHostawayReservation(paymentInfo);
+    if (!reservation) {
+        throw createHttpError(500, 'Something went wrong creating reservation in Hostaway');
+    }
+
+    logger.info(`[PaymentService][createHAReservation] Hostaway reservation created for chargeId ${chargeId}`);
+    logger.info(`[PaymentService][createHAReservation] Reservation object: ${JSON.stringify(reservation)}`);
+    return reservation;
+};
+
+const createHAOfflineCharge = async (paymentInfo, reservationId, chargeId) => {
+    const charge = await HostAwayClient.createOfflineCharge(paymentInfo, reservationId);
+    if (!charge) {
+        logger.info(`[PaymentService][createHAOfflineCharge] Something went wrong creating offline charge in Hostaway for reservationId ${reservation?.id}`);
+    }
+    logger.info(`[PaymentService][createHAOfflineCharge] Offline charge created for chargeId ${chargeId}`);
 }
 
 const updatePaymentStatus = async (requestObj) => {
@@ -349,9 +361,7 @@ const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDat
 
             <h3>Payment Information</h3>
             <div class="details fadeIn">
-                <p><strong>Payment Intent ID:</strong> ${paymentIntentId}</p>
                 <p><strong>Payment Charge ID:</strong> ${chargeId || ""}</p>
-                <p><strong>Customer ID:</strong> ${customerId}</p>
                 <p><strong>Payment Method:</strong> ${paymentMethod}</p>
                 <p><strong>Amount:</strong> ${parseFloat(amount) / 100} ${currency.toUpperCase()}</p>
                 <p><strong>Payment Status:</strong> ${paymentStatus}</p>
@@ -360,7 +370,7 @@ const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDat
 
 
             <div class="footer">
-                <p>This email was automatically generated. Please do not reply.</p>
+                <p>This email was auto generated. Please do not reply.</p>
                 <p><a href="https://luxurylodgingpm.co/">luxurylodgingpm.co</a></p>
             </div>
         </div>
@@ -372,8 +382,53 @@ const sendSuccessPaymentMail = async (paymentInfo, reservationId, reservationDat
     return true;
 }
 
-const getChargeInfo = async (paymentIntenId) => {
+const generateHash = async (userAccountId, orderId, amount, currency, chargebackProtection, apiKey) => {
+    const path = `${userAccountId}.${orderId}.${parseFloat(amount)}.${currency}.${chargebackProtection}`;
+    const hash = crypto.createHmac('sha256', apiKey).update(path).digest('hex');
+    logger.info(`[generateHash] Hash created for orderId ${orderId}`);
+    return hash;
+};
 
+const createOrderWithHash = async (requestObj) => {
+    const {
+        guestName,
+        guestEmail,
+        guestPhone,
+        listingId,
+        checkInDate,
+        checkOutDate,
+        guests,
+        amount,
+        currency,
+        couponName,
+    } = requestObj;
+
+    const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const paymentStatus = "pending";
+
+    const paymentInfo = await PaymentInfo.create({
+        guestName,
+        guestEmail,
+        guestPhone,
+        listingId,
+        checkInDate,
+        checkOutDate,
+        guests,
+        amount,
+        currency,
+        paymentStatus,
+        couponName,
+        orderId
+    });
+    logger.info(`[createOrderWithHash] New order created for guest ${guestName} with orderId ${orderId}`);
+
+    const apiKey = process.env.CHARGE_AUTOMATION_API_KEY;
+    const userAccountId = process.env.CHARGE_AUTOMATION_ACCOUNT_ID;
+    const url = process.env.CHARGE_AUTOMATION_CHECKOUT_IFRAME
+    const chargebackProtection = "Yes";
+    const hash = await generateHash(userAccountId, orderId, amount, currency, chargebackProtection, apiKey)
+
+    return { orderId, hash, userAccountId, url };
 }
 
 const paymentServices = {
@@ -383,7 +438,9 @@ const paymentServices = {
     savePaymentInfo,
     getPaymentIntentInfo,
     handleWebhookResponses,
-    getStripePublishableKey
+    getStripePublishableKey,
+    generateHash,
+    createOrderWithHash
 };
 
 export default paymentServices;

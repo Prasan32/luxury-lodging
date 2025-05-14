@@ -49,6 +49,13 @@ export const createCustomerSchema = Joi.object({
 });
 
 export const savePaymentInfoSchema = Joi.object({
+    orderId: Joi.string().required(),
+    paymentStatus: Joi.string().required(),
+    chargeId: Joi.string().required().allow(null),
+});
+
+
+export const createOrderSchema = Joi.object({
     guestName: Joi.string().required(),
     guestEmail: Joi.string().required(),
     guestPhone: Joi.string().required(),
@@ -60,11 +67,7 @@ export const savePaymentInfoSchema = Joi.object({
         'string.pattern.base': 'Date must be in the format "yyyy-mm-dd"',
     }).required(),
     guests: Joi.number().required(),
-    paymentIntentId: Joi.string().required(),
-    customerId: Joi.string().required(),
-    paymentMethod: Joi.string().required(),
     amount: Joi.number().required(),
     currency: Joi.string().required(),
-    paymentStatus: Joi.string().required(),
     couponName: Joi.string().required().allow(null),
 });

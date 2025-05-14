@@ -55,7 +55,12 @@ const PaymentInfo = sequelize.define("PaymentInfo", {
     },
     couponName:{
         type: DataTypes.STRING,
-    }
+    },
+    orderId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
 }, {
     tableName: "payment_info",
     timestamps: true
