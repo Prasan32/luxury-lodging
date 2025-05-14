@@ -378,7 +378,7 @@ const getDiscountPrice = async (couponCode, listingId, checkInDate, checkOutDate
 
 const getCalendar = async (listingId, startDate) => {
     const calendar = await HostAwayClient.getCalendar(listingId, startDate);
-    const { unAvailableDateForBooking, availableCheckOutDate, availableDate } = processAvailability(calendar);
+    const { unAvailableDateForBooking, availableCheckOutDate, availableDate } =await processAvailability(calendar);
     return {
         unAvailableDateForBooking,
         availableDate,
@@ -386,50 +386,58 @@ const getCalendar = async (listingId, startDate) => {
     };
 };
 
-function processAvailability(data) {
-    const availableDateSet =[];
+async function processAvailability(data) {
+    const availableDateSet = [];
     const unAvailableDateForBooking = [];
     const availableCheckoutDate = [];
 
-    // Step 1: Collect all arrival dates and departure dates from the reservations
     const arrivalDatesList = [];
     const departureDatesList = [];
+    
+    // Step 1: Extract reservation-based arrival/departure dates
     data.forEach(entry => {
         if (Array.isArray(entry.reservations)) {
             entry.reservations.forEach(res => {
-                if (res?.arrivalDate) {
-                    arrivalDatesList.push(res.arrivalDate);
-                }
-                if (res?.departureDate) {
-                    departureDatesList.push(res.departureDate)
-                }
+                if (res?.arrivalDate) arrivalDatesList.push(res.arrivalDate);
+                if (res?.departureDate) departureDatesList.push(res.departureDate);
             });
         }
     });
 
-    // Step 1.1: Find and remove dates that are both in arrival and departure
+    // Step 1.1: Remove dates that are both arrival and departure
     const duplicateDates = arrivalDatesList.filter(date => departureDatesList.includes(date));
-    if (duplicateDates.length) {
-        duplicateDates.forEach(date => {
-            unAvailableDateForBooking.push(date);
+    duplicateDates.forEach(date => {
+        unAvailableDateForBooking.push(date);
+        arrivalDatesList.splice(arrivalDatesList.indexOf(date), 1);
+        departureDatesList.splice(departureDatesList.indexOf(date), 1);
+    });
 
-            // Remove from both arrival and departure lists
-            const aIndex = arrivalDatesList.indexOf(date);
-            if (aIndex !== -1) arrivalDatesList.splice(aIndex, 1);
+    // Step 2: Create a set of available dates for quick lookup
+    const availableDateSetMap = new Set();
+    data.forEach(entry => {
+        if (entry.isAvailable == 1) {
+            availableDateSet.push(entry.date);
+            availableDateSetMap.add(entry.date);
+        }
+    });
 
-            const dIndex = departureDatesList.indexOf(date);
-            if (dIndex !== -1) departureDatesList.splice(dIndex, 1);
-        });
-    }
-
-    // Step 2: Process each date
+    // Step 3: Process unavailable dates
     data.forEach(entry => {
         const { date, isAvailable } = entry;
 
-        if (isAvailable == 1) {
-            availableDateSet.push(date);
-        } else {
+        if (isAvailable == 0) {
+            // If it's a reservation arrival date, allow checkout
             if (arrivalDatesList.includes(date)) {
+                availableCheckoutDate.push(date);
+                return;
+            }
+
+            // Check if previous day is available
+            const prevDate = new Date(date);
+            prevDate.setDate(prevDate.getDate() - 1);
+            const prevDateStr = prevDate.toISOString().split('T')[0];
+            
+            if (availableDateSetMap.has(prevDateStr)) {
                 availableCheckoutDate.push(date);
             } else {
                 unAvailableDateForBooking.push(date);
@@ -437,14 +445,13 @@ function processAvailability(data) {
         }
     });
 
-    // Step 3: Check if current date is in availableCheckoutDate
-    const today = new Date().toISOString().split('T')[0]; // format as 'YYYY-MM-DD'
+    // Step 4: Remove today if present in availableCheckoutDate
+    const today = new Date().toISOString().split('T')[0];
     const todayIndex = availableCheckoutDate.indexOf(today);
     if (todayIndex !== -1) {
-        availableCheckoutDate.splice(todayIndex, 1); // remove from checkout
-        unAvailableDateForBooking.push(today);       // add to unavailable
+        availableCheckoutDate.splice(todayIndex, 1);
+        unAvailableDateForBooking.push(today);
     }
-
 
     return {
         availableDate: availableDateSet,
@@ -452,6 +459,7 @@ function processAvailability(data) {
         availableCheckOutDate: availableCheckoutDate
     };
 }
+
 
 
 
