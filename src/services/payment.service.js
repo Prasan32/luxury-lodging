@@ -135,12 +135,12 @@ const savePaymentInfo = async (requestObj) => {
             logger.error(`[savePaymentInfo] No payment record found for chargeId ${chargeId} (orderId: ${orderId})`);
             throw createHttpError(500, 'Payment info not found');
         }
-        const reservation = await createHAReservation(paymentInfo, chargeId);
-        await updateReservationId(reservation?.id, paymentInfo.id);
-        await createHAOfflineCharge(paymentInfo, reservation?.id, chargeId);
+        // const reservation = await createHAReservation(paymentInfo, chargeId);
+        // await updateReservationId(reservation?.id, paymentInfo.id);
+        // await createHAOfflineCharge(paymentInfo, reservation?.id, chargeId);
 
-        //send success email to the host admin
-        sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
+        // //send success email to the host admin
+        // sendSuccessPaymentMail(paymentInfo, reservation?.id, reservation?.reservationDate);
         return paymentInfo;
     }
     return updatedCount;
