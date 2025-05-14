@@ -287,7 +287,7 @@ const createReservationRequestObj = (reservationObj) => {
         arrivalDate: checkInDate,
         departureDate: checkOutDate,
         phone: guestPhone,
-        totalPrice: parseFloat(amount) / 100,
+        totalPrice: parseFloat(amount),
         isPaid: true,
         paymentMethod,
         currency: currency.toUpperCase(),
@@ -309,7 +309,7 @@ const createOfflineChargeRequestObj = (obj, reservationId) => {
     const requestBody = {
         title: `Booking Payment from ${guestName}`,
         description: `Payment for reservation of listing ${listingId}. Payment for securing the booking from ${checkInDate} to ${checkOutDate}.`,
-        amount: parseFloat(amount) / 100,
+        amount: parseFloat(amount),
         paymentMethod: paymentMethodMapped,
         status: 'paid',
         scheduledDate: getCurrentDateTime()
@@ -333,8 +333,8 @@ const createOfflineCharge = async (obj, reservationId) => {
         });
 
         if (response.statusCode === 200 || response.statusCode === 201) {
-            logger.info(`Offline charge created successfully`);
-            logger.info(`Offline charge object from hostaway: ${JSON.stringify(response.data.result)}`);
+            logger.info(`[Hostaway] Offline charge created successfully`);
+            logger.info(`[Hostaway] Offline charge object from hostaway: ${JSON.stringify(response.data.result)}`);
         }
         return response.data?.result;
     } catch (error) {
