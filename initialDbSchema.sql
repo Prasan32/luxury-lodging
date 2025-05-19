@@ -71,6 +71,10 @@ CREATE TABLE `payment_info` (
   `checkInDate` varchar(255) DEFAULT NULL,
   `checkOutDate` varchar(255) DEFAULT NULL,
   `guests` int DEFAULT NULL,
+  `adults` INT DEFAULT NULL,
+  `children` INT DEFAULT NULL,
+  `infants` INT DEFAULT NULL,
+  `pets` INT DEFAULT NULL,
   `paymentIntentId` varchar(255) DEFAULT NULL,
   `customerId` varchar(255) DEFAULT NULL,
   `paymentMethod` varchar(255) DEFAULT NULL,
@@ -87,6 +91,10 @@ CREATE TABLE `payment_info` (
 );
 -- ALTER TABLE `payment_info` ADD COLUMN `orderId` varchar(255) NOT NULL UNIQUE;
 
+-- ALTER TABLE `payment_info` ADD COLUMN `adults` INT DEFAULT NULL;
+-- ALTER TABLE `payment_info` ADD COLUMN `children` INT DEFAULT NULL;
+-- ALTER TABLE `payment_info` ADD COLUMN `infants` INT DEFAULT NULL;
+-- ALTER TABLE `payment_info` ADD COLUMN `pets` INT DEFAULT NULL;
 
 CREATE TABLE `subscriber` (
   `id` int NOT NULL AUTO_INCREMENT,
