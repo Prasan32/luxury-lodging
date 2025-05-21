@@ -80,7 +80,7 @@ const createListingObject = (data) => {
         state: data?.state || "",
         city: data?.city || "",
         street: data?.street || "",
-        zipcode: data?.zipcode || "",
+        zipCode: data?.zipcode || "",
         lat: data?.lat || 0,
         lng: data?.lng || 0,
         propertyType: data?.bookingcomPropertyRoomName || "",
@@ -279,11 +279,30 @@ const checkAvailability = async (listingId, checkIn, checkOut) => {
     return isAvailable;
 }
 
-const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName) => {
+const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName, petCount) => {
+    let priceDetails = null;
     if (couponName !== null) {
-        return calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
+        priceDetails = calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
     }
-    const priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
+    priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
+
+    if(petCount){
+        //Fetch listingInfo and add the petFee
+        const listing = await HostAwayClient.getListingInfo(listingId);
+        const petFee = listing.airbnbPetFeeAmount;
+
+        if (petFee) {
+            priceDetails.components.push({
+                id: null,
+                name: "petFee",
+                title: "Pet fee",
+                value: petFee,
+                total: petFee
+            });
+            priceDetails.totalPrice = Number(priceDetails.totalPrice) + Number(petFee);
+        }
+    }
+
     return priceDetails;
 };
 

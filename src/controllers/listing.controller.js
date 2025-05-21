@@ -40,8 +40,8 @@ export const checkAvailability = asyncHandler(async (req, res, next) => {
 });
 
 export const calculatePrice = asyncHandler(async (req, res, next) => {
-    const { listingId, checkIn, checkOut, guests, couponName } = req.body;
-    const priceDetails = await listingService.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
+    const { listingId, checkIn, checkOut, guests, couponName, pet } = req.body;
+    const priceDetails = await listingService.calculatePrice(listingId, checkIn, checkOut, guests, couponName, pet);
     return res.status(200).json(priceDetails);
 });
 

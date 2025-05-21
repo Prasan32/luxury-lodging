@@ -29,6 +29,18 @@ const PaymentInfo = sequelize.define("PaymentInfo", {
     guests: {
         type: DataTypes.INTEGER,
     },
+    adults: {
+        type: DataTypes.INTEGER,
+    },
+    children: {
+        type: DataTypes.INTEGER,
+    },
+    infants: {
+        type: DataTypes.INTEGER,
+    },
+    pets: {
+        type: DataTypes.INTEGER,
+    },
     paymentIntentId: {
         type: DataTypes.STRING,
     },
