@@ -283,8 +283,9 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName, 
     let priceDetails = null;
     if (couponName !== null) {
         priceDetails = calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
+    }else{
+        priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
     }
-    priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
 
     if(petCount){
         //Fetch listingInfo and add the petFee
@@ -308,6 +309,7 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName, 
 
 const calculatePriceWithCouponCode = async (couponName, listingId, checkIn, checkOut, guests) => {
     const reservationCoupon = await HostAwayClient.createReservationCouponObject({ couponName, listingId, checkIn, checkOut });
+    console.log(reservationCoupon);
     if (!reservationCoupon) {
         throw createHttpError(400, 'Invalid Coupon');
     }
