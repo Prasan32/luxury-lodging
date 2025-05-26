@@ -5,6 +5,8 @@ import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
 import { Op } from "sequelize";
 import { stateMap } from "../helpers/state.js";
+import { getCurrentDate } from "../helpers/date.js";
+import PriceLabsClient from "../clients/priceLabs.js";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -530,6 +532,33 @@ const getLocationList = async () => {
     return result;
 };
 
+const getListingPriceFromPricelabs = async () => {
+    const listings = await Listing.findAll();
+    const currentDate = getCurrentDate();
+
+    //get the listing price for the currentdate from Pricelabs and update in the database
+    const listingList = listings.map((listing) => {
+        return {
+            "id": `${listing.id}`,
+            "pms": "hostaway",
+            "dateFrom": currentDate,
+            "dateTo": currentDate,
+            "reason": false
+        };
+    });
+    const listingPriceInfo = await PriceLabsClient.getListingPrice(listingList);
+    if (!listingPriceInfo) return;
+
+    for (const listing of listingPriceInfo) {
+        if (listing.error) continue;
+        const listingId = Number(listing.id);
+        const price = listing.data[0].price;
+        await Listing.update({ price }, { where: { id: listingId } });
+    }
+
+    return;
+}
+
 
 const listingService = {
     syncHostAwayListing,
@@ -543,7 +572,8 @@ const listingService = {
     getAmenities,
     getCountries,
     getDiscountPrice,
-    getLocationList
+    getLocationList,
+    getListingPriceFromPricelabs
 };
 
 export default listingService;

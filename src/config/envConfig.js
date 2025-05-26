@@ -18,6 +18,7 @@ const _config = {
     DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
     DATABASE_NAME: process.env.DATABASE_NAME,
     CORS_WHITELIST: process.env.CORS_WHITELIST,
+    PRICELABS_API_KEY: process.env.PRICELABS_API_KEY
 };
 
 export const config = Object.freeze(_config);

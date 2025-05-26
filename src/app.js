@@ -8,7 +8,7 @@ import { handleWebhookResponses } from "./controllers/payment.controller.js";
 import createHttpError from 'http-errors';
 import { config } from "./config/envConfig.js";
 import logger from './config/winstonLoggerConfig.js';
-import syncHostawayListing from './utils/jobScheduler.js';
+import { scheduledJobs } from "./utils/jobScheduler.js"
 
 const whitelist = config.CORS_WHITELIST ? config.CORS_WHITELIST.split(',') : [];
 const corsOptions = {
@@ -47,7 +47,7 @@ app.use(helmet());
 app.post('/payment/handlewebhookresponses', express.raw({ type: 'application/json' }), handleWebhookResponses);
 
 app.use(express.json());
-syncHostawayListing();
+scheduledJobs();
 app.use(appRoutes)
 
 app.use(globalErrorHandler);
