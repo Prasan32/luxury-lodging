@@ -25,8 +25,8 @@ async function getListingPriceFromPricelabs() {
 }
 
 export function scheduledJobs() {
-    schedule.scheduleJob({ hour: 13, minute: 5, tz: "America/New_York" }, syncHostawayListing);
-    schedule.scheduleJob({ hour: 13, minute: 7, tz: "America/New_York" }, getListingPriceFromPricelabs);
+    schedule.scheduleJob({ hour: 1, minute: 0, tz: "America/New_York" }, syncHostawayListing);
+    schedule.scheduleJob({ hour: 1, minute: 2, tz: "America/New_York" }, getListingPriceFromPricelabs);
 }
 
 
