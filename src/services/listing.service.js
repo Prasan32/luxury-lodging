@@ -7,6 +7,7 @@ import { Op } from "sequelize";
 import { stateMap } from "../helpers/state.js";
 import { getCurrentDate } from "../helpers/date.js";
 import PriceLabsClient from "../clients/priceLabs.js";
+import axios from "axios";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -286,7 +287,8 @@ const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName, 
     if (couponName !== null) {
         priceDetails = calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
     }else{
-        priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
+        // priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
+        priceDetails = await calculatePriceUsingBookingEngineAPI(listingId, checkIn, checkOut, guests, couponName);
     }
 
     if(petCount){
@@ -317,8 +319,33 @@ const calculatePriceWithCouponCode = async (couponName, listingId, checkIn, chec
     }
 
     const reservationCouponId = reservationCoupon.reservationCouponId;
-    const priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, reservationCouponId);
+    // const priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, reservationCouponId);
+    const priceDetails = await calculatePriceUsingBookingEngineAPI(listingId, checkIn, checkOut, guests, reservationCouponId);
     return priceDetails;
+}
+
+
+const calculatePriceUsingBookingEngineAPI = async (listingId, checkIn, checkOut, guests, reservationCouponId) => {
+    const url = `https://booking-engine.hostaway.com/bookingEngines/luxurylodging/listings/${listingId}/calendar/priceDetails`;
+    const requestBody = {
+        startingDate: new Date(checkIn),
+        endingDate: new Date(checkOut),
+        numberOfGuests: guests,
+        version: 2,
+        reservationCouponId: reservationCouponId
+    };
+    try {
+        const response = await axios.post(url, requestBody, {
+            headers: {
+                "Cache-Control": "no-cache",
+            },
+        });
+
+        return response.data?.result;
+    } catch (error) {
+        logger.error(`Error calculating price of listingId: ${listingId} for [${checkIn}-${checkOut}][guests:${guests}]`, error);
+        return null;
+    }
 }
 
 const filterCoupon = async (couponCode, listingId, checkInDate, checkOutDate) => {
