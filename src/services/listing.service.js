@@ -285,7 +285,7 @@ const checkAvailability = async (listingId, checkIn, checkOut) => {
 const calculatePrice = async (listingId, checkIn, checkOut, guests, couponName, petCount) => {
     let priceDetails = null;
     if (couponName !== null) {
-        priceDetails = calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
+        priceDetails = await calculatePriceWithCouponCode(couponName, listingId, checkIn, checkOut, guests);
     }else{
         // priceDetails = await HostAwayClient.calculatePrice(listingId, checkIn, checkOut, guests, couponName);
         priceDetails = await calculatePriceUsingBookingEngineAPI(listingId, checkIn, checkOut, guests, couponName);
