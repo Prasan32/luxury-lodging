@@ -33,24 +33,44 @@ const getAccessToken = async () => {
 
 const getListings = async () => {
     const url = `${HOSTAWAY_API_URL}/listings`;
+    const limit = 100; // Adjust as per Hostaway's API limits
+    let offset = 0;
+    let hasMore = true;
+    const allListings = [];
 
     try {
         const accessToken = await getAccessToken();
         if (!accessToken) return null;
 
-        const response = await axios.get(url, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Cache-Control": "no-cache",
-            },
-        });
+        while (hasMore) {
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Cache-Control": "no-cache",
+                },
+                params: {
+                    limit,
+                    offset,
+                },
+            });
 
-        return response.data?.result;
+            const listings = response.data?.result || [];
+            allListings.push(...listings);
+
+            if (listings.length < limit) {
+                hasMore = false;
+            } else {
+                offset += limit;
+            }
+        }
+
+        return allListings;
     } catch (error) {
         logger.error(`Error fetching listings`, error);
         return null;
     }
 };
+
 
 
 const getListingInfo = async (id) => {
