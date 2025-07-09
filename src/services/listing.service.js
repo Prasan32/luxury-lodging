@@ -146,6 +146,7 @@ const getListings = async (page, limit, priceOrder) => {
                 model: ListingImage,
                 as: 'images',
                 // order: [['sortOrder', 'DESC']]
+                attributes:['url']
             }
         ],
         order,
