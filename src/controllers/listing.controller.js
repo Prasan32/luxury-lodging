@@ -34,7 +34,7 @@ export const getListingCount = asyncHandler(async (req, res, next) => {
     }
 
     const count = await listingService.getListingCount();
-    await setDataInCache(cacheKey, count);
+    await setDataInCache(cacheKey, { count });
 
     return res.status(200).json({ count });
 });
