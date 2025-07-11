@@ -6,6 +6,7 @@ import logger from "../config/winstonLoggerConfig.js";
 
 export const syncHostAwayListing = asyncHandler(async (req, res, next) => {
     await listingService.syncHostAwayListing();
+    await listingService.getListingPerNightPrice();
     await deleteKeysWithPrefix('LL')
     return res.status(200).json({ message: "Listings synced successfully" });
 })
