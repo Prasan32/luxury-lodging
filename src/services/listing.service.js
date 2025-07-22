@@ -3,11 +3,12 @@ import HostAwayClient from "../clients/hostaway.js";
 import { Listing, ListingImage, ListingAmenity } from "../models/index.js";
 import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
-import { Op } from "sequelize";
+import { Op, fn, col, where } from 'sequelize';
 import { stateMap } from "../helpers/state.js";
 import { getCurrentDate, getNextDate } from "../helpers/date.js";
 import PriceLabsClient from "../clients/priceLabs.js";
 import axios from "axios";
+import CityState from "../models/CityState.js";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -618,6 +619,38 @@ const getListingPerNightPrice = async () => {
 }
 
 
+
+const getLocation = async (query) => {
+    const lowerQuery = query.toLowerCase();
+
+    const state = await CityState.findAll({
+        where: {
+            [Op.or]: [
+                where(fn('LOWER', col('state_name')), {
+                    [Op.like]: `${lowerQuery}%`
+                })
+            ]
+        },
+        attributes: ['state_name'],
+        limit: 2,
+    });
+
+    const city = await CityState.findAll({
+        where: {
+            [Op.or]: [
+                where(fn('LOWER', col('city')), {
+                    [Op.like]: `${lowerQuery}%`
+                })
+            ]
+        },
+        attributes: ['city'],
+        limit: 3
+    });
+
+    return [...state, ...city];
+};
+
+
 const listingService = {
     syncHostAwayListing,
     getListings,
@@ -632,7 +665,8 @@ const listingService = {
     getDiscountPrice,
     getLocationList,
     getListingPriceFromPricelabs,
-    getListingPerNightPrice
+    getListingPerNightPrice,
+    getLocation
 };
 
 export default listingService;

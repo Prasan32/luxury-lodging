@@ -140,3 +140,9 @@ export const getLocationList = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json(locationList);
 });
+
+
+export const getLocation = asyncHandler(async (req, res, next) => {
+    const locationList = await listingService.getLocation(req.query.search);
+    return res.status(200).json(locationList);
+});

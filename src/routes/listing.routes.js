@@ -11,7 +11,8 @@ import {
     getAmenities,
     getCountries,
     getDiscountPrice,
-    getLocationList
+    getLocationList,
+    getLocation
 } from "../controllers/listing.controller.js";
 import { validate, validateQuery } from "../middlewares/validation.js";
 import { calculatePriceSchema, checkAvailabilitySchema, searchListingsSchema, getListingSchema, getCalendarSchema, getDiscountPriceSchema } from "../validationSchema/listing.js";
@@ -40,5 +41,7 @@ router.route('/getcountries').get(getCountries);
 router.route('/getdiscountprice').get(validateQuery(getDiscountPriceSchema), getDiscountPrice);
 
 router.route('/getlocationlist').get(getLocationList)
+
+router.route('/getlocation').get(getLocation)
 
 export default router;
