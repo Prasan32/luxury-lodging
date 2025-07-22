@@ -1,23 +1,53 @@
 import listingService from "../services/listing.service.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
+import redisClient from "../config/redis.js";
+import { deleteKeysWithPrefix, generateCacheKey, getCachedData, setDataInCache } from "../helpers/index.js";
+import logger from "../config/winstonLoggerConfig.js";
 
 export const syncHostAwayListing = asyncHandler(async (req, res, next) => {
     await listingService.syncHostAwayListing();
+    await listingService.getListingPerNightPrice();
+    await deleteKeysWithPrefix('LL')
     return res.status(200).json({ message: "Listings synced successfully" });
 })
 
 export const getListings = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const { limit, page, priceOrder } = req.query;
     const listings = await listingService.getListings(page, limit, priceOrder);
+    await setDataInCache(cacheKey, listings);
+
     return res.status(200).json(listings);
 });
 
 export const getListingCount = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const count = await listingService.getListingCount();
+    await setDataInCache(cacheKey, { count });
+
     return res.status(200).json({ count });
 });
 
 export const getListingInfo = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const listingId = req.params.listingId;
     const listing = await listingService.getListingInfo(listingId);
 
@@ -25,11 +55,22 @@ export const getListingInfo = asyncHandler(async (req, res, next) => {
         return res.status(404).json({ message: `Listing with id ${listingId} not found` });
     }
 
+    await setDataInCache(cacheKey, listing);
+
     return res.status(200).json(listing);
 });
 
 export const searchListings = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const listings = await listingService.searchListings(req.body);
+    await setDataInCache(cacheKey, listings);
+
     return res.status(200).json(listings);
 });
 
@@ -53,12 +94,30 @@ export const getCalendar = asyncHandler(async (req, res, next) => {
 });
 
 export const getAmenities = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const amenities = await listingService.getAmenities();
+    await setDataInCache(cacheKey, amenities);
+
     return res.status(200).json(amenities);
 });
 
 export const getCountries = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const countries = await listingService.getCountries();
+    await setDataInCache(cacheKey, countries);
+
     return res.status(200).json(countries);
 });
 
@@ -69,6 +128,15 @@ export const getDiscountPrice = asyncHandler(async (req, res, next) => {
 });
 
 export const getLocationList = asyncHandler(async (req, res, next) => {
+    const cacheKey = generateCacheKey(req.originalUrl);
+
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData));
+    }
+
     const locationList = await listingService.getLocationList();
+    await setDataInCache(cacheKey, locationList);
+
     return res.status(200).json(locationList);
 });

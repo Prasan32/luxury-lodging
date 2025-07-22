@@ -5,7 +5,7 @@ import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
 import { Op } from "sequelize";
 import { stateMap } from "../helpers/state.js";
-import { getCurrentDate } from "../helpers/date.js";
+import { getCurrentDate, getNextDate } from "../helpers/date.js";
 import PriceLabsClient from "../clients/priceLabs.js";
 import axios from "axios";
 
@@ -146,6 +146,7 @@ const getListings = async (page, limit, priceOrder) => {
                 model: ListingImage,
                 as: 'images',
                 // order: [['sortOrder', 'DESC']]
+                attributes:['url']
             }
         ],
         order,
@@ -586,6 +587,36 @@ const getListingPriceFromPricelabs = async () => {
     return;
 }
 
+const getListingPerNightPrice = async () => {
+    const listings = await Listing.findAll();
+
+    const currentDate = getCurrentDate();
+    const nextDate = getNextDate();
+
+    const failedUpdate = [];
+
+    for (const listing of listings) {
+        const priceComponents = await calculatePrice(listing.id, currentDate, nextDate, 1, null, null);
+        if (!priceComponents || !priceComponents.totalPrice) {
+            failedUpdate.push({ id: listing.id, listing: listing.internalListingName });
+            continue;
+        }
+
+        const averagePrice = Number((Number(priceComponents.totalPrice) / 30).toFixed(2));
+        await Listing.update({ price: averagePrice }, { where: { id: listing.id } });
+    }
+
+    if (failedUpdate.length > 0) {
+        logger.error(`Failed to update ${failedUpdate.length}`);
+        logger.error(failedUpdate);
+    }
+
+    return {
+        failedUpdateCount: failedUpdate.length,
+        listings: failedUpdate
+    };
+}
+
 
 const listingService = {
     syncHostAwayListing,
@@ -600,7 +631,8 @@ const listingService = {
     getCountries,
     getDiscountPrice,
     getLocationList,
-    getListingPriceFromPricelabs
+    getListingPriceFromPricelabs,
+    getListingPerNightPrice
 };
 
 export default listingService;
