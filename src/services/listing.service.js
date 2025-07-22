@@ -3,11 +3,13 @@ import HostAwayClient from "../clients/hostaway.js";
 import { Listing, ListingImage, ListingAmenity } from "../models/index.js";
 import logger from "../config/winstonLoggerConfig.js";
 import sequelize from "../config/database.js";
-import { Op } from "sequelize";
+import { Op, fn, col, where } from 'sequelize';
 import { stateMap } from "../helpers/state.js";
 import { getCurrentDate, getNextDate } from "../helpers/date.js";
 import PriceLabsClient from "../clients/priceLabs.js";
 import axios from "axios";
+import CityState from "../models/CityState.js";
+import { haversineDistance } from "../utils/distanceUtils.js";
 
 const syncHostAwayListing = async () => {
     const listings = await HostAwayClient.getListings();
@@ -188,9 +190,9 @@ const getListingInfo = async (listingId) => {
     return listing;
 }
 
-const processSearchConditions = (address, personCapacity, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities) => {
+const processSearchConditions = (address, personCapacity, priceOrder, bedroomsNumber, roomType, minPrice, maxPrice, amenities, customLocation) => {
     const listingSearchCondition = {
-        ...(Array.isArray(address) && address.length > 0 && {
+        ...(!customLocation && Array.isArray(address) && address.length > 0 && {
             [Op.or]: address.map(city => ({
                 city: { [Op.like]: `%${city}%` }
             }))
@@ -228,14 +230,25 @@ const searchListings = async (requestObj) => {
         roomType,
         minPrice,
         maxPrice,
-        amenities
+        amenities,
+        customLocation,
     } = requestObj;
 
     const {
         listingSearchCondition,
         listingAmenitySearchCondition,
         order
-    } = processSearchConditions(location, guests, priceOrder, bedrooms, roomType, minPrice, maxPrice, amenities);
+    } = processSearchConditions(
+        location,
+        guests,
+        priceOrder,
+        bedrooms,
+        roomType,
+        minPrice,
+        maxPrice,
+        amenities,
+        customLocation
+    );
 
     const includes = [
         {
@@ -243,39 +256,62 @@ const searchListings = async (requestObj) => {
             as: 'images'
         }
     ];
-    
-    amenities !== "" && includes.push({
-        model: ListingAmenity,
-        as: 'amenities',
-        where: listingAmenitySearchCondition
+
+    if (amenities !== "") {
+        includes.push({
+            model: ListingAmenity,
+            as: 'amenities',
+            where: listingAmenitySearchCondition
+        });
+    }
+
+    const listings = await Listing.findAll({
+        where: listingSearchCondition,
+        include: includes,
+        order
     });
 
-    const listings = await Listing.findAll(
-        {
-            where: listingSearchCondition,
-            include: includes,
-            order
-        },
-    );
+    // Convert to plain objects to avoid circular references
+    let withDistance = listings.map(listing => listing.toJSON());
 
-    // Sort images by sortOrder within each listing
-    listings.forEach(listing => {
-        listing.images.sort((a, b) => a.sortOrder - b.sortOrder);
+    if (customLocation) {
+        const { lat: userLat, lng: userLon } = customLocation;
+
+        withDistance = withDistance.map(listing => {
+            listing.distance = haversineDistance(userLat, userLon, listing.lat, listing.lng);
+            return listing;
+        });
+
+        withDistance = withDistance
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, 10);
+    }
+
+    // Sort images by sortOrder
+    withDistance.forEach(listing => {
+        if (listing.images && listing.images.length > 0) {
+            listing.images.sort((a, b) => a.sortOrder - b.sortOrder);
+        }
     });
 
-    if (checkIn != "" && checkOut != "") {
+    if (checkIn !== "" && checkOut !== "") {
         const accessToken = await HostAwayClient.getAccessToken();
-        for (const listing of listings) {
-            const isAvailable = await HostAwayClient.checkAvailability(accessToken, listing.id, checkIn, checkOut);
+
+        for (const listing of withDistance) {
+            const isAvailable = await HostAwayClient.checkAvailability(
+                accessToken,
+                listing.id,
+                checkIn,
+                checkOut
+            );
             listing.isAvailable = isAvailable;
         }
 
-        const availableListings = listings.filter(listing => listing.isAvailable);
-        return availableListings;
+        return withDistance.filter(listing => listing.isAvailable);
     }
 
-    return listings;
-}
+    return withDistance;
+};
 
 const checkAvailability = async (listingId, checkIn, checkOut) => {
     const accessToken = await HostAwayClient.getAccessToken();
@@ -618,6 +654,54 @@ const getListingPerNightPrice = async () => {
 }
 
 
+
+const getLocation = async (query) => {
+    const lowerQuery = `${query.toLowerCase()}%`;
+
+    // DISTINCT state_name
+    const states = await sequelize.query(
+        `SELECT 
+            CONCAT(state_name) AS location,
+            lat,
+            lng,
+            'state' AS type
+         FROM city_state_info
+         WHERE LOWER(state_name) LIKE :search
+         GROUP BY state_name
+         LIMIT 10`,
+        {
+            replacements: { search: lowerQuery },
+            type: sequelize.QueryTypes.SELECT
+        }
+    );
+
+    // DISTINCT city
+    const cities = await sequelize.query(
+        `SELECT 
+            CONCAT(city, ', ', state_name) AS location,
+            lat,
+            lng,
+            'city' AS type
+         FROM city_state_info
+         WHERE LOWER(city) LIKE :search
+         GROUP BY city, state_name
+         LIMIT 10`,
+        {
+            replacements: { search: lowerQuery },
+            type: sequelize.QueryTypes.SELECT
+        }
+    );
+
+    // Merge and deduplicate by location string (case-insensitive)
+    const combined = [...states, ...cities];
+    const uniqueLocations = Array.from(new Map(
+        combined.map(loc => [loc.location.toLowerCase(), loc])
+    ).values());
+
+    return uniqueLocations;
+};
+
+
 const listingService = {
     syncHostAwayListing,
     getListings,
@@ -632,7 +716,8 @@ const listingService = {
     getDiscountPrice,
     getLocationList,
     getListingPriceFromPricelabs,
-    getListingPerNightPrice
+    getListingPerNightPrice,
+    getLocation
 };
 
 export default listingService;
