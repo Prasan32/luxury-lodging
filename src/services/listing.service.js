@@ -660,7 +660,11 @@ const getLocation = async (query) => {
 
     // DISTINCT state_name
     const states = await sequelize.query(
-        `SELECT state_name AS location, lat, lng, 'state' AS type
+        `SELECT 
+            CONCAT(state_name) AS location,
+            lat,
+            lng,
+            'state' AS type
          FROM city_state_info
          WHERE LOWER(state_name) LIKE :search
          GROUP BY state_name
@@ -673,10 +677,14 @@ const getLocation = async (query) => {
 
     // DISTINCT city
     const cities = await sequelize.query(
-        `SELECT city AS location, lat, lng, 'city' AS type
+        `SELECT 
+            CONCAT(city, ', ', state_name) AS location,
+            lat,
+            lng,
+            'city' AS type
          FROM city_state_info
          WHERE LOWER(city) LIKE :search
-         GROUP BY city
+         GROUP BY city, state_name
          LIMIT 10`,
         {
             replacements: { search: lowerQuery },
@@ -684,7 +692,7 @@ const getLocation = async (query) => {
         }
     );
 
-    // Merge and deduplicate by location name (case-insensitive)
+    // Merge and deduplicate by location string (case-insensitive)
     const combined = [...states, ...cities];
     const uniqueLocations = Array.from(new Map(
         combined.map(loc => [loc.location.toLowerCase(), loc])
