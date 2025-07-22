@@ -61,16 +61,7 @@ export const getListingInfo = asyncHandler(async (req, res, next) => {
 });
 
 export const searchListings = asyncHandler(async (req, res, next) => {
-    // const cacheKey = generateCacheKey(req.originalUrl);
-
-    // const cachedData = await getCachedData(cacheKey);
-    // if (cachedData) {
-    //     return res.status(200).json(JSON.parse(cachedData));
-    // }
-
     const listings = await listingService.searchListings(req.body);
-    // await setDataInCache(cacheKey, listings);
-
     return res.status(200).json(listings);
 });
 

@@ -15,6 +15,12 @@ export const searchListingsSchema = Joi.object({
     minPrice: Joi.number().required().allow(""),
     maxPrice: Joi.number().required().allow(""),
     amenities: Joi.array().items(Joi.number().required()).required().min(0).allow(""),
+    customLocation: Joi.object({
+        location: Joi.string().required(),
+        lat: Joi.string().required(),
+        lng: Joi.string().required(),
+        type: Joi.string().valid('city', 'state').required(),
+    }).optional().allow("", null),
 }).custom((value, helpers) => {
     if (value.checkIn !== "" && value.checkOut === "") {
         return helpers.message({ custom: '"checkOut" must not be empty when "checkIn" is provided' });
@@ -29,6 +35,10 @@ export const searchListingsSchema = Joi.object({
 
     if (value.maxPrice !== "" && value.minPrice === "") {
         return helpers.message({ custom: '"minPrice" must not be empty when "maxPrice" is provided' });
+    }
+
+    if(value.location && value.location.length > 0 && value.customLocation) {
+        return helpers.message({ custom: '"customLocation" must not be provided when "location" is provided' });
     }
 
     return value;
