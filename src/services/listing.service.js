@@ -621,33 +621,41 @@ const getListingPerNightPrice = async () => {
 
 
 const getLocation = async (query) => {
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = `${query.toLowerCase()}%`;
 
-    const state = await CityState.findAll({
-        where: {
-            [Op.or]: [
-                where(fn('LOWER', col('state_name')), {
-                    [Op.like]: `${lowerQuery}%`
-                })
-            ]
-        },
-        attributes: ['state_name'],
-        limit: 2,
-    });
+    // DISTINCT state_name
+    const states = await sequelize.query(
+        `SELECT state_name AS location, lat, lng, 'state' AS type
+         FROM city_state_info
+         WHERE LOWER(state_name) LIKE :search
+         GROUP BY state_name
+         LIMIT 10`,
+        {
+            replacements: { search: lowerQuery },
+            type: sequelize.QueryTypes.SELECT
+        }
+    );
 
-    const city = await CityState.findAll({
-        where: {
-            [Op.or]: [
-                where(fn('LOWER', col('city')), {
-                    [Op.like]: `${lowerQuery}%`
-                })
-            ]
-        },
-        attributes: ['city'],
-        limit: 3
-    });
+    // DISTINCT city
+    const cities = await sequelize.query(
+        `SELECT city AS location, lat, lng, 'city' AS type
+         FROM city_state_info
+         WHERE LOWER(city) LIKE :search
+         GROUP BY city
+         LIMIT 10`,
+        {
+            replacements: { search: lowerQuery },
+            type: sequelize.QueryTypes.SELECT
+        }
+    );
 
-    return [...state, ...city];
+    // Merge and deduplicate by location name (case-insensitive)
+    const combined = [...states, ...cities];
+    const uniqueLocations = Array.from(new Map(
+        combined.map(loc => [loc.location.toLowerCase(), loc])
+    ).values());
+
+    return uniqueLocations;
 };
 
 
