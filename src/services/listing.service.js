@@ -10,9 +10,11 @@ import PriceLabsClient from "../clients/priceLabs.js";
 import axios from "axios";
 import CityState from "../models/CityState.js";
 import { haversineDistance } from "../utils/distanceUtils.js";
+import { disabledListings } from "../utils/disabledListings.js";
 
 const syncHostAwayListing = async () => {
-    const listings = await HostAwayClient.getListings();
+    let listings = await HostAwayClient.getListings();
+    listings = listings.filter((listing) => !disabledListings.includes(listing.id));
 
     if (!listings) {
         logger.error("Failed to fetch listings from Hostaway API");
