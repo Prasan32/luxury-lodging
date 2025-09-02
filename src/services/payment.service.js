@@ -130,7 +130,7 @@ const savePaymentInfo = async (requestObj) => {
 
     if (chargeId && paymentStatus === "paymentSuccess") {
         // create reservation and offline charge in Hostaway
-        const paymentInfo = await PaymentInfo.findOne({ where: { chargeId } });
+        const paymentInfo = await PaymentInfo.findOne({ where: { orderId } });
         if (!paymentInfo) {
             logger.error(`[savePaymentInfo] No payment record found for chargeId ${chargeId} (orderId: ${orderId})`);
             throw createHttpError(500, 'Payment info not found');
