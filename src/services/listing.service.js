@@ -365,7 +365,7 @@ const calculatePriceWithCouponCode = async (couponName, listingId, checkIn, chec
 
 
 const calculatePriceUsingBookingEngineAPI = async (listingId, checkIn, checkOut, guests, reservationCouponId) => {
-    const url = `https://booking-engine.hostaway.com/bookingEngines/luxurylodging/listings/${listingId}/calendar/priceDetails`;
+    const url = `https://booking-engine.hostaway.com/bookingEngines/escapestays/listings/${listingId}/calendar/priceDetails`;
     const requestBody = {
         startingDate: new Date(checkIn),
         endingDate: new Date(checkOut),
